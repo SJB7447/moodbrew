@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>무무 (MuMu) — 캐릭터 프리뷰</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --cream: #FAF6F1;
+    --cream-deep: #F2EBE0;
+    --latte: #C8A882;
+    --espresso: #6B4C35;
+    --dark-roast: #2C1A0E;
+    --mood-blue: #A8BFD8;
+    --mood-yellow: #F5D98B;
+    --mood-green: #A8C5A0;
+    --mood-pink: #E8B4B8;
+    --mood-purple: #C4A8D4;
+    --mood-gray: #B8B4AE;
+  }
+
+  body {
+    background: var(--cream);
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--dark-roast);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* 배경 그레인 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 2rem;
+    color: var(--espresso);
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--latte);
+    font-size: 0.95rem;
+    margin-bottom: 48px;
+    font-weight: 300;
+  }
+
+  /* 무무 SVG */
+  .mumu-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* 감정 상태 그리드 */
+  .states-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  @media (max-width: 600px) {
+    .states-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .state-card {
+    background: var(--cream-deep);
+    border-radius: 20px;
+    padding: 20px 12px;
+    text-align: center;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .state-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(200,168,130,0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .state-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    border-color: var(--latte);
+    box-shadow: 0 8px 32px rgba(107,76,53,0.12);
+  }
+
+  .state-card:hover::before { opacity: 1; }
+
+  .state-card.active {
+    border-color: var(--espresso);
+    background: var(--latte);
+  }
+
+  .state-card.active .state-label { color: var(--cream); }
+
+  .mumu-wrapper {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 12px;
+  }
+
+  .state-label {
+    font-size: 0.78rem;
+    color: var(--espresso);
+    font-weight: 500;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .state-desc {
+    font-size: 0.68rem;
+    color: var(--latte);
+    display: block;
+    line-height: 1.4;
+  }
+
+  /* 인터랙티브 챗봇 프리뷰 */
+  .chat-preview {
+    background: var(--cream-deep);
+    border-radius: 28px;
+    padding: 32px 28px;
+    margin-bottom: 40px;
+    border: 1px dashed var(--latte);
+    box-shadow: 0 4px 24px rgba(107,76,53,0.08);
+  }
+
+  .chat-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed rgba(200,168,130,0.4);
+  }
+
+  .chat-mumu {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+  }
+
+  .chat-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1rem;
+    color: var(--espresso);
+  }
+
+  .chat-subtitle {
+    font-size: 0.75rem;
+    color: var(--latte);
+    margin-top: 2px;
+  }
+
+  /* 진행 바 (커피잔) */
+  .coffee-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .progress-label {
+    font-size: 0.75rem;
+    color: var(--latte);
+    white-space: nowrap;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 8px;
+    background: rgba(200,168,130,0.2);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--latte), var(--espresso));
+    border-radius: 100px;
+    transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .progress-cup {
+    font-size: 1.1rem;
+  }
+
+  /* 말풍선 */
+  .bubble {
+    background: var(--cream);
+    border: 1px dashed var(--latte);
+    border-radius: 20px;
+    border-bottom-left-radius: 4px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--dark-roast);
+    position: relative;
+    animation: bubbleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes bubbleIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* 선택지 버튼 */
+  .choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .choice-btn {
+    background: var(--cream);
+    border: 1.5px solid rgba(200,168,130,0.5);
+    border-radius: 100px;
+    padding: 10px 18px;
+    font-size: 0.88rem;
+    color: var(--espresso);
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .choice-btn:hover {
+    background: var(--latte);
+    color: var(--cream);
+    border-color: var(--latte);
+    transform: scale(1.04);
+  }
+
+  .choice-btn:active {
+    transform: scale(0.97);
+  }
+
+  /* 카페 카드 프리뷰 */
+  .card-section {
+    margin-bottom: 48px;
+  }
+
+  .section-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.2rem;
+    color: var(--espresso);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cafe-cards {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    scrollbar-width: none;
+  }
+
+  .cafe-cards::-webkit-scrollbar { display: none; }
+
+  .cafe-card {
+    min-width: 220px;
+    background: var(--cream-deep);
+    border-radius: 20px;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 4px 20px rgba(107,76,53,0.08);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+  }
+
+  .cafe-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 36px rgba(107,76,53,0.15);
+  }
+
+  .cafe-img {
+    width: 100%;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    position: relative;
+  }
+
+  .cafe-img-1 { background: linear-gradient(135deg, #D4B896, #C8A882); }
+  .cafe-img-2 { background: linear-gradient(135deg, #B8C8D0, #A8BFD8); }
+  .cafe-img-3 { background: linear-gradient(135deg, #C8D4B8, #A8C5A0); }
+
+  .badge-open {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(124,184,124,0.9);
+    color: white;
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    border-radius: 100px;
+    font-weight: 500;
+    backdrop-filter: blur(4px);
+  }
+
+  .cafe-body {
+    padding: 14px;
+  }
+
+  .cafe-name {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 0.95rem;
+    color: var(--dark-roast);
+    margin-bottom: 4px;
+  }
+
+  .cafe-dist {
+    font-size: 0.72rem;
+    color: var(--latte);
+    margin-bottom: 10px;
+  }
+
+  .mumu-comment {
+    background: var(--cream);
+    border-left: 3px solid var(--latte);
+    padding: 6px 10px;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.75rem;
+    color: var(--espresso);
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+
+  .mood-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+
+  .mood-tag {
+    background: rgba(200,168,130,0.15);
+    color: var(--espresso);
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    border-radius: 100px;
+  }
+
+  .cafe-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  .action-btn {
+    flex: 1;
+    background: var(--espresso);
+    color: var(--cream);
+    border: none;
+    border-radius: 10px;
+    padding: 8px 4px;
+    font-size: 0.68rem;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .action-btn:hover { background: var(--dark-roast); transform: scale(1.03); }
+
+  .action-btn.heart {
+    background: rgba(200,168,130,0.2);
+    color: var(--espresso);
+    flex: 0 0 36px;
+  }
+
+  /* 컬러 팔레트 */
+  .palette-section {
+    margin-bottom: 48px;
+  }
+
+  .palette-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+  }
+
+  .palette-item {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(107,76,53,0.1);
+  }
+
+  .palette-color {
+    height: 64px;
+  }
+
+  .palette-info {
+    background: var(--cream-deep);
+    padding: 8px 10px;
+  }
+
+  .palette-name {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--espresso);
+    display: block;
+  }
+
+  .palette-hex {
+    font-size: 0.62rem;
+    color: var(--latte);
+    font-family: monospace;
+  }
+
+  /* 타이포그래피 */
+  .typo-section {
+    background: var(--cream-deep);
+    border-radius: 24px;
+    padding: 28px;
+    margin-bottom: 48px;
+    border: 1px dashed var(--latte);
+  }
+
+  .typo-display {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 2rem;
+    color: var(--espresso);
+    line-height: 1.4;
+    margin-bottom: 16px;
+  }
+
+  .typo-body {
+    font-size: 0.95rem;
+    color: var(--dark-roast);
+    line-height: 1.8;
+    margin-bottom: 12px;
+  }
+
+  .typo-small {
+    font-size: 0.8rem;
+    color: var(--latte);
+  }
+
+  /* 다크모드 프리뷰 */
+  .dark-preview {
+    background: #1A1208;
+    border-radius: 24px;
+    padding: 28px;
+    margin-bottom: 48px;
+  }
+
+  .dark-preview .mumu-wrapper { margin: 0 auto 20px; width: 80px; height: 80px; }
+  .dark-preview .bubble-dark {
+    background: #2C1A0E;
+    border: 1px dashed rgba(200,168,130,0.3);
+    border-radius: 20px;
+    padding: 16px 20px;
+    color: var(--cream);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .dark-preview .dark-label {
+    color: var(--latte);
+    text-align: center;
+    font-size: 0.75rem;
+  }
+
+  /* 모션 힌트 */
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  @keyframes steam {
+    0% { opacity: 0; transform: translateY(0) scaleX(1); }
+    50% { opacity: 0.7; transform: translateY(-8px) scaleX(1.1); }
+    100% { opacity: 0; transform: translateY(-16px) scaleX(0.8); }
+  }
+
+  .floating { animation: float 3s ease-in-out infinite; }
+
+  /* SVG 내 steam 애니메이션 */
+  .steam-1 { animation: steam 2s ease-in-out infinite; }
+  .steam-2 { animation: steam 2s ease-in-out infinite 0.4s; }
+  .steam-3 { animation: steam 2s ease-in-out infinite 0.8s; }
+
+  @keyframes blink {
+    0%, 90%, 100% { transform: scaleY(1); }
+    95% { transform: scaleY(0.1); }
+  }
+  .mumu-eye { animation: blink 4s ease-in-out infinite; transform-origin: center; }
+
+  .footer-note {
+    text-align: center;
+    color: var(--latte);
+    font-size: 0.8rem;
+    margin-top: 16px;
+    font-family: 'Noto Serif KR', serif;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <h1>☕ 무무 (MuMu)</h1>
+  <p class="subtitle">감성 카페 추천 서비스의 마스코트 캐릭터 & 디자인 시스템 프리뷰</p>
+
+  <!-- 감정 상태 그리드 -->
+  <div class="states-grid" id="statesGrid">
+
+    <!-- HAPPY -->
+    <div class="state-card active" onclick="selectState(this, 'happy', '안녕하세요! 오늘 기분에 꼭 맞는 카페를 찾아드릴게요 🤎', '오늘의 기분이 어떤가요?')">
+      <div class="mumu-wrapper floating">
+        <svg class="mumu-svg" viewBox="0 0 100 100">
+          <!-- 몸통 -->
+          <ellipse cx="50" cy="72" rx="28" ry="20" fill="#C8A882"/>
+          <rect x="22" y="52" width="56" height="24" rx="8" fill="#C8A882"/>
+          <!-- 커피 내부 -->
+          <ellipse cx="50" cy="52" rx="24" ry="10" fill="#6B4C35"/>
+          <!-- 손잡이 -->
+          <path d="M78 58 Q92 58 92 68 Q92 78 78 78" stroke="#C8A882" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <!-- 증기 -->
+          <path class="steam-1" d="M38 46 Q36 40 38 34 Q40 28 38 22" stroke="#FAF6F1" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+          <path class="steam-2" d="M50 44 Q48 38 50 32 Q52 26 50 20" stroke="#FAF6F1" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+          <path class="steam-3" d="M62 46 Q60 40 62 34 Q64 28 62 22" stroke="#FAF6F1" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.8"/>
+          <!-- 눈 (행복: 초승달) -->
+          <g class="mumu-eye">
+            <path d="M38 60 Q42 56 46 60" stroke="#2C1A0E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <path d="M54 60 Q58 56 62 60" stroke="#2C1A0E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          </g>
+          <!-- 홍조 -->
+          <ellipse cx="34" cy="64" rx="5" ry="3" fill="#E8B4B8" opacity="0.6"/>
+          <ellipse cx="66" cy="64" rx="5" ry="3" fill="#E8B4B8" opacity="0.6"/>
+          <!-- 팔 -->
+          <path d="M22 60 Q12 58 10 52" stroke="#C8A882" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M78 60 Q88 58 90 52" stroke="#C8A882" stroke-width="5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="state-label">😊 HAPPY</span>
+      <span class="state-desc">환영할 때<br>추천 완료 시</span>
+    </div>
+
+    <!-- THINKING -->
+    <div class="state-card" onclick="selectState(this, 'thinking', '음... 잠깐만요, 딱 맞는 곳을 찾아볼게요 🔍', '어떤 분위기가 좋으세요?')">
+      <div class="mumu-wrapper floating" style="animation-delay: 0.3s">
+        <svg class="mumu-svg" viewBox="0 0 100 100">
+          <ellipse cx="50" cy="72" rx="28" ry="20" fill="#C8A882"/>
+          <rect x="22" y="52" width="56" height="24" rx="8" fill="#C8A882"/>
+          <ellipse cx="50" cy="52" rx="24" ry="10" fill="#6B4C35"/>
+          <path d="M78 58 Q92 58 92 68 Q92 78 78 78" stroke="#C8A882" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <path class="steam-1" d="M50 44 Q48 38 50 32 Q52 26 50 20" stroke="#FAF6F1" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+          <!-- 생각하는 눈 (굴리는 눈) -->
+          <circle cx="40" cy="59" r="5" fill="#FAF6F1"/>
+          <circle cx="60" cy="59" r="5" fill="#FAF6F1"/>
+          <circle cx="42" cy="57" r="2.5" fill="#2C1A0E"/>
+          <circle cx="62" cy="57" r="2.5" fill="#2C1A0E"/>
+          <!-- 생각 말풍선 -->
+          <circle cx="82" cy="30" r="8" fill="#FAF6F1" opacity="0.9"/>
+          <text x="82" y="34" text-anchor="middle" font-size="9">?</text>
+          <circle cx="76" cy="42" r="3" fill="#FAF6F1" opacity="0.6"/>
+          <circle cx="72" cy="48" r="2" fill="#FAF6F1" opacity="0.4"/>
+          <ellipse cx="34" cy="64" rx="5" ry="3" fill="#E8B4B8" opacity="0.5"/>
+          <ellipse cx="66" cy="64" rx="5" ry="3" fill="#E8B4B8" opacity="0.5"/>
+          <!-- 팔 (턱받침) -->
+          <path d="M22 65 Q15 70 18 76" stroke="#C8A882" stroke-width="5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="state-label">🤔 THINKING</span>
+      <span class="state-desc">상담 중<br>로딩 시</span>
+    </div>
+
+    <!-- SAD_EMPATHY -->
+    <div class="state-card" onclick="selectState(this, 'sad', '오늘 많이 힘드셨겠어요... 잠깐 쉬어가도 괜찮아요 🤎', '어떤 하루였어요?')">
+      <div class="mumu-wrapper floating" style="animation-delay: 0.6s">
+        <svg class="mumu-svg" viewBox="0 0 100 100">
+          <ellipse cx="50" cy="72" rx="28" ry="20" fill="#A8BFD8"/>
+          <rect x="22" y="52" width="56" height="24" rx="8" fill="#A8BFD8"/>
+          <ellipse cx="50" cy="52" rx="24" ry="10" fill="#6B8CAE"/>
+          <path d="M78 58 Q92 58 92 68 Q92 78 78 78" stroke="#A8BFD8" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <!-- 슬픈 눈썹 -->
+          <path d="M34 54 Q38 50 44 53" stroke="#2C1A0E" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M56 53 Q62 50 66 54" stroke="#2C1A0E" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- 공감 눈 -->
+          <ellipse cx="40" cy="60" rx="4" ry="4.5" fill="#FAF6F1"/>
+          <circle cx="40" cy="61" r="2.2" fill="#2C1A0E"/>
+          <ellipse cx="60" cy="60" rx="4" ry="4.5" fill="#FAF6F1"/>
+          <circle cx="60" cy="61" r="2.2" fill="#2C1A0E"/>
+          <!-- 눈물 -->
+          <path d="M38 65 Q37 70 40 73" stroke="#A8BFD8" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <ellipse cx="34" cy="66" rx="5" ry="3" fill="#B8D0E8" opacity="0.5"/>
+          <ellipse cx="66" cy="66" rx="5" ry="3" fill="#B8D0E8" opacity="0.5"/>
+          <path d="M22 62 Q14 65 16 72" stroke="#A8BFD8" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M78 62 Q86 65 84 72" stroke="#A8BFD8" stroke-width="5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="state-label">🥺 EMPATHY</span>
+      <span class="state-desc">힘든 감정<br>공감 시</span>
+    </div>
+
+    <!-- SLEEPY -->
+    <div class="state-card" onclick="selectState(this, 'sleepy', '이 늦은 시간에 카페를요? 😴 디카페인으로 찾아드릴까요?', '밤에도 함께할게요~')">
+      <div class="mumu-wrapper floating" style="animation-delay: 0.9s">
+        <svg class="mumu-svg" viewBox="0 0 100 100">
+          <ellipse cx="50" cy="72" rx="28" ry="20" fill="#C4A8D4"/>
+          <rect x="22" y="52" width="56" height="24" rx="8" fill="#C4A8D4"/>
+          <ellipse cx="50" cy="52" rx="24" ry="10" fill="#9B7AB4"/>
+          <path d="M78 58 Q92 58 92 68 Q92 78 78 78" stroke="#C4A8D4" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <!-- 반쯤 감긴 눈 -->
+          <path d="M34 60 Q40 56 46 60" stroke="#2C1A0E" stroke-width="2.5" fill="#C4A8D4" stroke-linecap="round"/>
+          <path d="M54 60 Q60 56 66 60" stroke="#2C1A0E" stroke-width="2.5" fill="#C4A8D4" stroke-linecap="round"/>
+          <path d="M36 61 Q40 64 44 61" stroke="#2C1A0E" stroke-width="1.5" fill="none"/>
+          <path d="M56 61 Q60 64 64 61" stroke="#2C1A0E" stroke-width="1.5" fill="none"/>
+          <!-- ZZZ -->
+          <text x="74" y="32" font-size="8" fill="#C4A8D4" font-weight="bold" opacity="0.8">z</text>
+          <text x="80" y="24" font-size="10" fill="#C4A8D4" font-weight="bold" opacity="0.9">z</text>
+          <text x="88" y="16" font-size="12" fill="#C4A8D4" font-weight="bold">Z</text>
+          <!-- 별 -->
+          <text x="18" y="38" font-size="10">⭐</text>
+          <ellipse cx="34" cy="65" rx="5" ry="3" fill="#E8C8F0" opacity="0.5"/>
+          <ellipse cx="66" cy="65" rx="5" ry="3" fill="#E8C8F0" opacity="0.5"/>
+        </svg>
+      </div>
+      <span class="state-label">😴 SLEEPY</span>
+      <span class="state-desc">밤 시간대<br>접속 시</span>
+    </div>
+
+    <!-- EXCITED -->
+    <div class="state-card" onclick="selectState(this, 'excited', '오늘 딱 맞는 카페 찾았어요! 이거 진짜 맛있을 것 같아요 ☕✨', '이 메뉴 강추예요!')">
+      <div class="mumu-wrapper floating" style="animation-delay: 1.2s">
+        <svg class="mumu-svg" viewBox="0 0 100 100">
+          <ellipse cx="50" cy="72" rx="28" ry="20" fill="#F5D98B"/>
+          <rect x="22" y="52" width="56" height="24" rx="8" fill="#F5D98B"/>
+          <ellipse cx="50" cy="52" rx="24" ry="10" fill="#C8A040"/>
+          <path d="M78 58 Q92 58 92 68 Q92 78 78 78" stroke="#F5D98B" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <path class="steam-1" d="M38 46 Q36 40 38 34" stroke="#FAF6F1" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.9"/>
+          <path class="steam-2" d="M50 44 Q48 38 50 32" stroke="#FAF6F1" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.9"/>
+          <path class="steam-3" d="M62 46 Q60 40 62 34" stroke="#FAF6F1" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.9"/>
+          <!-- 빛나는 눈 -->
+          <circle cx="40" cy="60" r="5" fill="#FAF6F1"/>
+          <circle cx="60" cy="60" r="5" fill="#FAF6F1"/>
+          <circle cx="40" cy="60" r="2.5" fill="#2C1A0E"/>
+          <circle cx="60" cy="60" r="2.5" fill="#2C1A0E"/>
+          <circle cx="41.5" cy="58.5" r="1" fill="white"/>
+          <circle cx="61.5" cy="58.5" r="1" fill="white"/>
+          <!-- 반짝이 -->
+          <text x="12" y="30" font-size="12">✨</text>
+          <text x="76" y="26" font-size="10">⭐</text>
+          <ellipse cx="34" cy="64" rx="5" ry="3" fill="#FFB8B8" opacity="0.7"/>
+          <ellipse cx="66" cy="64" rx="5" ry="3" fill="#FFB8B8" opacity="0.7"/>
+          <!-- 두 팔 번쩍 -->
+          <path d="M22 58 Q10 48 14 38" stroke="#F5D98B" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M78 58 Q90 48 86 38" stroke="#F5D98B" stroke-width="5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="state-label">☕ EXCITED</span>
+      <span class="state-desc">메뉴 추천<br>발견 시</span>
+    </div>
+
+    <!-- RAINY -->
+    <div class="state-card" onclick="selectState(this, 'rainy', '비가 오네요 🌧️ 창가 자리에서 빗소리 들으며 있기 딱 좋은 날이에요.', '비 오는 날 감성 카페는?')">
+      <div class="mumu-wrapper floating" style="animation-delay: 1.5s">
+        <svg class="mumu-svg" viewBox="0 0 100 100">
+          <ellipse cx="50" cy="72" rx="28" ry="20" fill="#A8BFD8"/>
+          <rect x="22" y="52" width="56" height="24" rx="8" fill="#A8BFD8"/>
+          <ellipse cx="50" cy="52" rx="24" ry="10" fill="#7A9CB8"/>
+          <path d="M78 58 Q92 58 92 68 Q92 78 78 78" stroke="#A8BFD8" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <!-- 우산 -->
+          <path d="M26 46 Q26 30 50 28 Q74 30 74 46 Z" fill="#6B4C35"/>
+          <line x1="50" y1="46" x2="50" y2="58" stroke="#6B4C35" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M50 58 Q50 64 44 64" stroke="#6B4C35" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <!-- 빗방울 -->
+          <line x1="20" y1="70" x2="16" y2="82" stroke="#A8C8E0" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+          <line x1="85" y1="65" x2="81" y2="77" stroke="#A8C8E0" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+          <line x1="12" y1="55" x2="8" y2="67" stroke="#A8C8E0" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+          <!-- 눈 -->
+          <path d="M36 60 Q40 57 44 60" stroke="#2C1A0E" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M56 60 Q60 57 64 60" stroke="#2C1A0E" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <ellipse cx="34" cy="65" rx="4" ry="2.5" fill="#B8D0E8" opacity="0.5"/>
+          <ellipse cx="66" cy="65" rx="4" ry="2.5" fill="#B8D0E8" opacity="0.5"/>
+        </svg>
+      </div>
+      <span class="state-label">🌧️ RAINY</span>
+      <span class="state-desc">비 오는 날<br>날씨 연동</span>
+    </div>
+
+    <!-- CELEBRATE -->
+    <div class="state-card" onclick="selectState(this, 'celebrate', '와, 즐겨찾기 10개 달성이에요! 진짜 카페 탐험가시네요 🎉', '축하해요!')">
+      <div class="mumu-wrapper floating" style="animation-delay: 1.8s">
+        <svg class="mumu-svg" viewBox="0 0 100 100">
+          <ellipse cx="50" cy="72" rx="28" ry="20" fill="#E8A87C"/>
+          <rect x="22" y="52" width="56" height="24" rx="8" fill="#E8A87C"/>
+          <ellipse cx="50" cy="52" rx="24" ry="10" fill="#C87840"/>
+          <path d="M78 58 Q92 58 92 68 Q92 78 78 78" stroke="#E8A87C" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <!-- 파티 햇 -->
+          <polygon points="50,20 38,48 62,48" fill="#E8A87C" stroke="#C87840" stroke-width="1"/>
+          <circle cx="50" cy="20" r="3" fill="#F5D98B"/>
+          <line x1="42" y1="40" x2="40" y2="44" stroke="#F5D98B" stroke-width="1.5"/>
+          <line x1="50" y1="36" x2="50" y2="40" stroke="#F5D98B" stroke-width="1.5"/>
+          <line x1="58" y1="40" x2="60" y2="44" stroke="#F5D98B" stroke-width="1.5"/>
+          <!-- 행복한 눈 -->
+          <path d="M36 60 Q40 55 44 60" stroke="#2C1A0E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M56 60 Q60 55 64 60" stroke="#2C1A0E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <!-- 색종이 -->
+          <text x="10" y="35" font-size="10">🎊</text>
+          <text x="78" y="42" font-size="8">🎉</text>
+          <ellipse cx="34" cy="64" rx="5" ry="3" fill="#FFB8B8" opacity="0.7"/>
+          <ellipse cx="66" cy="64" rx="5" ry="3" fill="#FFB8B8" opacity="0.7"/>
+          <path d="M22 58 Q10 52 14 44" stroke="#E8A87C" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M78 58 Q90 52 86 44" stroke="#E8A87C" stroke-width="5" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="state-label">🎉 CELEBRATE</span>
+      <span class="state-desc">달성 축하<br>이벤트 시</span>
+    </div>
+
+    <!-- FOCUSED -->
+    <div class="state-card" onclick="selectState(this, 'focused', '집중하기 좋은 카페를 찾고 계신군요 🔍 와이파이랑 콘센트 있는 곳으로!', '어떤 작업 하실 건가요?')">
+      <div class="mumu-wrapper floating" style="animation-delay: 2.1s">
+        <svg class="mumu-svg" viewBox="0 0 100 100">
+          <ellipse cx="50" cy="72" rx="28" ry="20" fill="#A8C5A0"/>
+          <rect x="22" y="52" width="56" height="24" rx="8" fill="#A8C5A0"/>
+          <ellipse cx="50" cy="52" rx="24" ry="10" fill="#7BA870"/>
+          <path d="M78 58 Q92 58 92 68 Q92 78 78 78" stroke="#A8C5A0" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <!-- 돋보기 -->
+          <circle cx="26" cy="42" r="10" stroke="#6B4C35" stroke-width="3" fill="none"/>
+          <circle cx="26" cy="42" r="6" fill="#B8D8E8" opacity="0.4"/>
+          <line x1="33" y1="49" x2="40" y2="56" stroke="#6B4C35" stroke-width="3" stroke-linecap="round"/>
+          <!-- 진지한 눈 -->
+          <rect x="34" y="57" width="12" height="7" rx="3.5" fill="#FAF6F1"/>
+          <rect x="54" y="57" width="12" height="7" rx="3.5" fill="#FAF6F1"/>
+          <circle cx="40" cy="60.5" r="2.5" fill="#2C1A0E"/>
+          <circle cx="60" cy="60.5" r="2.5" fill="#2C1A0E"/>
+          <!-- 안경테 효과 -->
+          <line x1="46" y1="60" x2="54" y2="60" stroke="#8B6B50" stroke-width="1.5"/>
+          <ellipse cx="34" cy="66" rx="5" ry="3" fill="#C8E0C0" opacity="0.5"/>
+          <ellipse cx="66" cy="66" rx="5" ry="3" fill="#C8E0C0" opacity="0.5"/>
+        </svg>
+      </div>
+      <span class="state-label">🔍 FOCUSED</span>
+      <span class="state-desc">공부/작업<br>카페 추천 시</span>
+    </div>
+
+  </div>
+
+  <!-- 챗봇 인터랙티브 프리뷰 -->
+  <div class="chat-preview">
+    <div class="chat-header">
+      <div class="chat-mumu" id="chatMumu">
+        <svg class="mumu-svg" viewBox="0 0 100 100">
+          <ellipse cx="50" cy="72" rx="28" ry="20" fill="#C8A882"/>
+          <rect x="22" y="52" width="56" height="24" rx="8" fill="#C8A882"/>
+          <ellipse cx="50" cy="52" rx="24" ry="10" fill="#6B4C35"/>
+          <path d="M78 58 Q92 58 92 68 Q92 78 78 78" stroke="#C8A882" stroke-width="6" fill="none" stroke-linecap="round"/>
+          <path class="steam-1" d="M50 44 Q48 38 50 32" stroke="#FAF6F1" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <g class="mumu-eye">
+            <path d="M38 60 Q42 56 46 60" stroke="#2C1A0E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <path d="M54 60 Q58 56 62 60" stroke="#2C1A0E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          </g>
+          <ellipse cx="34" cy="64" rx="5" ry="3" fill="#E8B4B8" opacity="0.6"/>
+          <ellipse cx="66" cy="64" rx="5" ry="3" fill="#E8B4B8" opacity="0.6"/>
+        </svg>
+      </div>
+      <div>
+        <div class="chat-title">무무</div>
+        <div class="chat-subtitle" id="chatSubtitle">감성 카페 큐레이터</div>
+      </div>
+    </div>
+
+    <div class="coffee-progress">
+      <span class="progress-cup">☕</span>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width: 20%"></div>
+      </div>
+      <span class="progress-label" id="progressLabel">1 / 5~10</span>
+    </div>
+
+    <div class="bubble" id="chatBubble">
+      안녕하세요! 저는 무무예요 ☕<br>
+      오늘 당신의 기분에 꼭 맞는 카페를 찾아드릴게요.<br>
+      <br>
+      <strong>오늘 하루 어떠셨어요?</strong>
+    </div>
+
+    <div class="choices" id="chatChoices">
+      <button class="choice-btn" onclick="nextQ(this, 2)">😊 나쁘지 않았어요</button>
+      <button class="choice-btn" onclick="nextQ(this, 2)">😴 좀 피곤했어요</button>
+      <button class="choice-btn" onclick="nextQ(this, 2)">😢 힘든 하루였어요</button>
+      <button class="choice-btn" onclick="nextQ(this, 2)">🎉 설레는 일이 있었어요</button>
+    </div>
+  </div>
+
+  <!-- 추천 카드 프리뷰 -->
+  <div class="card-section">
+    <div class="section-title">
+      <span>✨ 추천 카드 프리뷰</span>
+    </div>
+    <div class="cafe-cards">
+      <div class="cafe-card">
+        <div class="cafe-img cafe-img-1">
+          ☕
+          <span class="badge-open">🟢 영업중</span>
+        </div>
+        <div class="cafe-body">
+          <div class="cafe-name">온기 커피로스터스</div>
+          <div class="cafe-dist">📍 150m · 도보 2분</div>
+          <div class="mumu-comment">"오늘 같은 날엔 이런 아늑한 공간이 딱이에요 🌿"</div>
+          <div class="mood-tags">
+            <span class="mood-tag">#조용한</span>
+            <span class="mood-tag">#통창</span>
+            <span class="mood-tag">#아늑한</span>
+          </div>
+          <div class="cafe-actions">
+            <button class="action-btn">길찾기</button>
+            <button class="action-btn">결제</button>
+            <button class="action-btn heart">♡</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cafe-card">
+        <div class="cafe-img cafe-img-2">
+          🌧️
+          <span class="badge-open">🟢 영업중</span>
+        </div>
+        <div class="cafe-body">
+          <div class="cafe-name">창가의 오후</div>
+          <div class="cafe-dist">📍 240m · 도보 3분</div>
+          <div class="mumu-comment">"비 오는 날, 창가 자리에서 빗소리 들으며 🌧️"</div>
+          <div class="mood-tags">
+            <span class="mood-tag">#통창있는</span>
+            <span class="mood-tag">#감성적인</span>
+            <span class="mood-tag">#혼자오기좋은</span>
+          </div>
+          <div class="cafe-actions">
+            <button class="action-btn">길찾기</button>
+            <button class="action-btn">결제</button>
+            <button class="action-btn heart">♡</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="cafe-card">
+        <div class="cafe-img cafe-img-3">
+          🌿
+          <span class="badge-open">🟢 영업중</span>
+        </div>
+        <div class="cafe-body">
+          <div class="cafe-name">초록 라운지</div>
+          <div class="cafe-dist">📍 290m · 도보 4분</div>
+          <div class="mumu-comment">"식물이 가득한 힐링 공간이에요 🌱"</div>
+          <div class="mood-tags">
+            <span class="mood-tag">#아늑한</span>
+            <span class="mood-tag">#식물카페</span>
+            <span class="mood-tag">#힐링</span>
+          </div>
+          <div class="cafe-actions">
+            <button class="action-btn">길찾기</button>
+            <button class="action-btn">결제</button>
+            <button class="action-btn heart">♡</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 컬러 팔레트 -->
+  <div class="palette-section">
+    <div class="section-title">🎨 컬러 시스템</div>
+    <div class="palette-grid">
+      <div class="palette-item">
+        <div class="palette-color" style="background:#FAF6F1"></div>
+        <div class="palette-info"><span class="palette-name">크림</span><span class="palette-hex">#FAF6F1</span></div>
+      </div>
+      <div class="palette-item">
+        <div class="palette-color" style="background:#F2EBE0"></div>
+        <div class="palette-info"><span class="palette-name">크림 딥</span><span class="palette-hex">#F2EBE0</span></div>
+      </div>
+      <div class="palette-item">
+        <div class="palette-color" style="background:#C8A882"></div>
+        <div class="palette-info"><span class="palette-name">라떼</span><span class="palette-hex">#C8A882</span></div>
+      </div>
+      <div class="palette-item">
+        <div class="palette-color" style="background:#6B4C35"></div>
+        <div class="palette-info"><span class="palette-name">에스프레소</span><span class="palette-hex">#6B4C35</span></div>
+      </div>
+      <div class="palette-item">
+        <div class="palette-color" style="background:#2C1A0E"></div>
+        <div class="palette-info"><span class="palette-name">다크 로스트</span><span class="palette-hex">#2C1A0E</span></div>
+      </div>
+      <div class="palette-item">
+        <div class="palette-color" style="background:#A8BFD8"></div>
+        <div class="palette-info"><span class="palette-name">무드 블루</span><span class="palette-hex">#A8BFD8</span></div>
+      </div>
+      <div class="palette-item">
+        <div class="palette-color" style="background:#F5D98B"></div>
+        <div class="palette-info"><span class="palette-name">무드 옐로우</span><span class="palette-hex">#F5D98B</span></div>
+      </div>
+      <div class="palette-item">
+        <div class="palette-color" style="background:#A8C5A0"></div>
+        <div class="palette-info"><span class="palette-name">무드 그린</span><span class="palette-hex">#A8C5A0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 타이포 -->
+  <div class="typo-section">
+    <div class="section-title">✍️ 타이포그래피</div>
+    <div class="typo-display">오늘 하루, 수고했어요.</div>
+    <div class="typo-body">당신의 감성을 가장 잘 아는 카페로 안내해 드릴게요. 따뜻한 라떼 한 잔과 함께하는 오늘의 쉼표.</div>
+    <div class="typo-small">#조용한 #아늑한 #창가자리 · 도보 3분 · 영업중</div>
+  </div>
+
+  <!-- 다크모드 -->
+  <div class="dark-preview">
+    <div class="section-title" style="color:#C8A882; margin-bottom:20px">🌙 다크모드 (감성 야경)</div>
+    <div class="mumu-wrapper">
+      <svg class="mumu-svg" viewBox="0 0 100 100">
+        <ellipse cx="50" cy="72" rx="28" ry="20" fill="#C8A882"/>
+        <rect x="22" y="52" width="56" height="24" rx="8" fill="#C8A882"/>
+        <ellipse cx="50" cy="52" rx="24" ry="10" fill="#6B4C35"/>
+        <path d="M78 58 Q92 58 92 68 Q92 78 78 78" stroke="#C8A882" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <path class="steam-1" d="M50 44 Q48 38 50 32" stroke="#FAF6F1" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.5"/>
+        <!-- 빛나는 눈 (야경 버전) -->
+        <circle cx="40" cy="60" r="5" fill="#FAF6F1" opacity="0.9"/>
+        <circle cx="60" cy="60" r="5" fill="#FAF6F1" opacity="0.9"/>
+        <circle cx="40" cy="60" r="2.5" fill="#2C1A0E"/>
+        <circle cx="60" cy="60" r="2.5" fill="#2C1A0E"/>
+        <circle cx="41" cy="58.5" r="1.2" fill="white"/>
+        <circle cx="61" cy="58.5" r="1.2" fill="white"/>
+        <!-- 별 -->
+        <text x="14" y="32" font-size="8" opacity="0.6">⭐</text>
+        <text x="78" y="28" font-size="6" opacity="0.4">✨</text>
+        <ellipse cx="34" cy="64" rx="5" ry="3" fill="#E8B4B8" opacity="0.4"/>
+        <ellipse cx="66" cy="64" rx="5" ry="3" fill="#E8B4B8" opacity="0.4"/>
+      </svg>
+    </div>
+    <div class="bubble-dark">
+      늦은 밤에도 함께할게요 🌙<br>
+      <span style="color:var(--latte); font-size:0.85rem">디카페인 메뉴 위주로 찾아드릴까요?</span>
+    </div>
+    <div class="dark-label">배경 #1A1208 · 카드 #2C1A0E · 포인트 #C8A882</div>
+  </div>
+
+  <p class="footer-note">☕ 무무와 함께하는 감성 카페 일기장</p>
+
+</div>
+
+<script>
+const questions = [
+  {
+    text: "안녕하세요! 저는 무무예요 ☕<br>오늘 당신의 기분에 꼭 맞는 카페를 찾아드릴게요.<br><br><strong>오늘 하루 어떠셨어요?</strong>",
+    choices: ["😊 나쁘지 않았어요", "😴 좀 피곤했어요", "😢 힘든 하루였어요", "🎉 설레는 일이 있었어요"]
+  },
+  {
+    text: "그렇군요! 저도 그런 날 있어요 🤎<br><br><strong>지금 기분을 색깔로 표현하면?</strong>",
+    choices: ["💙 파란색 (차분한)", "🩶 회색 (무기력한)", "💛 노란색 (설레는)", "💚 초록색 (포근한)"]
+  },
+  {
+    text: "오늘 카페에 <strong>혼자 가실 건가요?</strong><br>아니면 누군가와 함께인가요?",
+    choices: ["🙋 혼자요", "💑 둘이서", "👫 친구들이랑", "👨‍👩‍👧 가족이랑"]
+  },
+  {
+    text: "카페에서 주로 <strong>뭘 하실 것 같아요?</strong>",
+    choices: ["😌 그냥 쉬기", "💻 공부/작업", "💬 대화", "🤔 혼자 생각 정리"]
+  },
+  {
+    text: "오늘은 어떤 맛이 당기세요? 🍵<br><br><strong>음료 취향을 알려주세요!</strong>",
+    choices: ["🍯 달달한 것", "☕ 쌉싸름한 것", "🧊 시원한 것", "🔥 따뜻한 것"]
+  }
+];
+
+let currentQ = 0;
+
+function nextQ(btn, nextIdx) {
+  btn.style.background = 'var(--latte)';
+  btn.style.color = 'var(--cream)';
+  btn.style.borderColor = 'var(--latte)';
+
+  setTimeout(() => {
+    currentQ = Math.min(nextIdx, questions.length - 1);
+    const q = questions[currentQ];
+
+    const bubble = document.getElementById('chatBubble');
+    bubble.style.opacity = '0';
+    bubble.style.transform = 'translateY(8px)';
+
+    setTimeout(() => {
+      bubble.innerHTML = q.text;
+      bubble.style.opacity = '1';
+      bubble.style.transform = 'translateY(0)';
+      bubble.style.transition = 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+
+      const choices = document.getElementById('chatChoices');
+      choices.innerHTML = '';
+      q.choices.forEach((c, i) => {
+        const btn2 = document.createElement('button');
+        btn2.className = 'choice-btn';
+        btn2.textContent = c;
+        btn2.style.animationDelay = `${i * 0.08}s`;
+        const next = Math.min(currentQ + 1, questions.length - 1);
+        btn2.onclick = function() { nextQ(this, next); };
+        choices.appendChild(btn2);
+      });
+
+      const pct = Math.round(((currentQ + 1) / questions.length) * 100);
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('progressLabel').textContent = `${currentQ + 1} / 5~10`;
+    }, 200);
+  }, 300);
+}
+
+function selectState(card, state, text, sub) {
+  document.querySelectorAll('.state-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+
+  const bubble = document.getElementById('chatBubble');
+  bubble.style.opacity = '0';
+  setTimeout(() => {
+    bubble.innerHTML = text;
+    bubble.style.opacity = '1';
+    bubble.style.transition = 'opacity 0.3s ease';
+  }, 150);
+
+  document.getElementById('chatSubtitle').textContent = sub;
+}
+</script>
+
+</body>
+</html>
