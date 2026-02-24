@@ -25,7 +25,7 @@ interface Props {
 // 무드 옵션
 const moodOptions = [
     { state: 'happy', img: '/mumu/happy.png', label: '행복해요' },
-    { state: 'sad', img: '/mumu/sad.png', label: '우울해요' },
+    { state: 'sad', img: '/mumu/empathy.png', label: '우울해요' },
     { state: 'tired', img: '/mumu/sleepy.png', label: '피곤해요' },
     { state: 'excited', img: '/mumu/excited.png', label: '설레요' },
     { state: 'angry', img: '/mumu/focused.png', label: '짜증나요' },
