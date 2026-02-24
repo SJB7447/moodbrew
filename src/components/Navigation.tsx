@@ -1,18 +1,19 @@
-import { Home, MessageCircle, Star, Heart, Settings } from 'lucide-react';
+import { Home, Coffee, MessageCircle, Star, Heart, ShoppingBag, User, Settings } from 'lucide-react';
 import type { AppPage } from '../types';
 
 interface Props {
     currentPage: AppPage;
     onNavigate: (page: AppPage) => void;
+    cartCount?: number;
 }
 
-export default function Navigation({ currentPage, onNavigate }: Props) {
+export default function Navigation({ currentPage, onNavigate, cartCount = 0 }: Props) {
     const items: { page: AppPage; icon: typeof Home; label: string }[] = [
         { page: 'home', icon: Home, label: '홈' },
         { page: 'chat', icon: MessageCircle, label: '상담' },
+        { page: 'menu', icon: Coffee, label: '메뉴' },
         { page: 'recommend', icon: Star, label: '추천' },
         { page: 'favorites', icon: Heart, label: '즐겨찾기' },
-        { page: 'settings', icon: Settings, label: '설정' },
     ];
 
     return (
@@ -23,7 +24,12 @@ export default function Navigation({ currentPage, onNavigate }: Props) {
                     className={`nav-item ${currentPage === item.page ? 'active' : ''}`}
                     onClick={() => onNavigate(item.page)}
                 >
-                    <item.icon className="nav-icon" size={22} />
+                    <div className="nav-icon-wrap">
+                        <item.icon className="nav-icon" size={22} />
+                        {item.page === 'cart' && cartCount > 0 && (
+                            <span className="nav-badge">{cartCount}</span>
+                        )}
+                    </div>
                     <span>{item.label}</span>
                 </button>
             ))}

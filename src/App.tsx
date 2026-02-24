@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { AppPage, User, Favorite, Recommendation, WeatherContext } from './types';
+import type { AppPage, User, Favorite, Recommendation, WeatherContext, CartItem, MenuProduct } from './types';
 import * as api from './services/api';
 import HomePage from './pages/HomePage';
 import ChatPage from './pages/ChatPage';
@@ -7,6 +7,10 @@ import RecommendPage from './pages/RecommendPage';
 import FavoritesPage from './pages/FavoritesPage';
 import ReviewPage from './pages/ReviewPage';
 import SettingsPage from './pages/SettingsPage';
+import MenuPage from './pages/MenuPage';
+import MenuDetailPage from './pages/MenuDetailPage';
+import CartPage from './pages/CartPage';
+import ProfilePage from './pages/ProfilePage';
 import Navigation from './components/Navigation';
 
 export default function App() {
@@ -23,6 +27,10 @@ export default function App() {
     const [reviewCafe, setReviewCafe] = useState<any>(null);
     const [guestStatus, setGuestStatus] = useState({ guest_count: 0, remaining: 50 });
 
+    // 장바구니 상태
+    const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const [selectedProduct, setSelectedProduct] = useState<MenuProduct | null>(null);
+
     // 초기 로드: 날씨 + 게스트 현황
     useEffect(() => {
         api.getWeather().then(setWeatherCtx).catch(() => { });
@@ -34,25 +42,32 @@ export default function App() {
         setTimeout(() => setToast(null), 3000);
     }, []);
 
-    // 게스트 등록 + 상담 시작
-    const handleStartChat = useCallback(async () => {
+    // 게스트 등록 + 세션 시작 (HomePage에서 호출)
+    const handleUserRegister = useCallback(async (): Promise<{ userId: string; sessionId: string } | null> => {
         try {
-            let userId = user?.user_id;
-            if (!userId) {
+            let currentUserId = user?.user_id;
+            if (!currentUserId) {
                 const reg = await api.registerGuest();
                 if (reg.error) {
                     showToast(reg.message);
-                    return;
+                    return null;
                 }
-                setUser({ user_id: reg.user_id, user_type: 'guest', nickname: `게스트${reg.guest_number}`, created_at: Date.now(), last_active: Date.now() });
-                userId = reg.user_id;
+                setUser({
+                    user_id: reg.user_id,
+                    user_type: 'guest',
+                    nickname: `게스트${reg.guest_number}`,
+                    created_at: Date.now(),
+                    last_active: Date.now()
+                });
+                currentUserId = reg.user_id;
                 setGuestStatus({ guest_count: reg.guest_count, remaining: 50 - reg.guest_count });
             }
-            const result = await api.startChat(userId!);
+            const result = await api.startChat(currentUserId!);
             setSessionId(result.session_id);
-            setPage('chat');
+            return { userId: currentUserId!, sessionId: result.session_id };
         } catch (e) {
             showToast('서버 연결에 실패했어요 😢');
+            return null;
         }
     }, [user, showToast]);
 
@@ -97,18 +112,45 @@ export default function App() {
         showToast('즐겨찾기에서 삭제했어요');
     }, [user, showToast]);
 
-    // 리뷰 작성 시작
+    // 리뷰
     const handleStartReview = useCallback((cafe: any) => {
         setReviewCafe(cafe);
         setPage('review');
     }, []);
 
-    // 리뷰 완료
     const handleReviewComplete = useCallback(() => {
         setReviewCafe(null);
         showToast('리뷰가 등록되었어요! 감사합니다 😊');
         setPage('recommend');
     }, [showToast]);
+
+    // 장바구니
+    const handleAddToCart = useCallback((item: Omit<CartItem, 'id'>) => {
+        const newItem: CartItem = {
+            ...item,
+            id: `cart_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        };
+        setCartItems(prev => [...prev, newItem]);
+        showToast('장바구니에 담았어요 ☕');
+        setPage('cart');
+    }, [showToast]);
+
+    const handleUpdateCartQuantity = useCallback((id: string, delta: number) => {
+        setCartItems(prev => prev.map(item =>
+            item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
+        ));
+    }, []);
+
+    const handleRemoveCartItem = useCallback((id: string) => {
+        setCartItems(prev => prev.filter(item => item.id !== id));
+        showToast('삭제했어요');
+    }, [showToast]);
+
+    // 메뉴 선택
+    const handleSelectMenu = useCallback((product: MenuProduct) => {
+        setSelectedProduct(product);
+        setPage('menu-detail');
+    }, []);
 
     // 즐겨찾기 목록 로드
     useEffect(() => {
@@ -117,14 +159,18 @@ export default function App() {
         }
     }, [user, page]);
 
+    const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
     return (
         <div className="app">
             <div className="app-content">
                 {page === 'home' && (
                     <HomePage
-                        onStart={handleStartChat}
+                        onComplete={handleChatComplete}
                         weatherCtx={weatherCtx}
                         guestStatus={guestStatus}
+                        userId={user?.user_id || null}
+                        onUserRegister={handleUserRegister}
                     />
                 )}
                 {page === 'chat' && sessionId && (
@@ -132,6 +178,26 @@ export default function App() {
                         sessionId={sessionId}
                         onComplete={handleChatComplete}
                     />
+                )}
+                {page === 'menu' && (
+                    <MenuPage onSelectMenu={handleSelectMenu} />
+                )}
+                {page === 'menu-detail' && selectedProduct && (
+                    <MenuDetailPage
+                        product={selectedProduct}
+                        onBack={() => setPage('menu')}
+                        onAddToCart={handleAddToCart}
+                    />
+                )}
+                {page === 'cart' && (
+                    <CartPage
+                        items={cartItems}
+                        onUpdateQuantity={handleUpdateCartQuantity}
+                        onRemoveItem={handleRemoveCartItem}
+                    />
+                )}
+                {page === 'profile' && (
+                    <ProfilePage onNavigate={(p) => setPage(p as AppPage)} />
                 )}
                 {page === 'recommend' && (
                     <RecommendPage
@@ -158,11 +224,9 @@ export default function App() {
                         onBack={() => setPage('recommend')}
                     />
                 )}
-                {page === 'settings' && (
-                    <SettingsPage />
-                )}
+                {page === 'settings' && <SettingsPage />}
             </div>
-            <Navigation currentPage={page} onNavigate={setPage} />
+            <Navigation currentPage={page} onNavigate={setPage} cartCount={cartCount} />
             {toast && <div className="toast">{toast}</div>}
         </div>
     );

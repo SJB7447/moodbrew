@@ -144,8 +144,37 @@ export interface NavigationLinks {
     google: string;
 }
 
+// ===== 메뉴 상품 =====
+export interface MenuProduct {
+    id: string;
+    name: string;
+    nameEn: string;
+    price: number;
+    image: string;
+    description: string;
+    category: 'coffee' | 'tea' | 'dessert' | 'smoothie';
+    options: {
+        temperatures: ('HOT' | 'ICE')[];
+        sizes: ('S' | 'M' | 'L')[];
+    };
+    reviews: {
+        rating: number;
+        count: number;
+        items: { user: string; rating: number; text: string; date: string }[];
+    };
+}
+
+// ===== 장바구니 =====
+export interface CartItem {
+    id: string;
+    product: MenuProduct;
+    temperature: 'HOT' | 'ICE';
+    size: 'S' | 'M' | 'L';
+    quantity: number;
+}
+
 // ===== 앱 상태 =====
-export type AppPage = 'home' | 'chat' | 'recommend' | 'favorites' | 'review' | 'settings';
+export type AppPage = 'home' | 'chat' | 'menu' | 'menu-detail' | 'cart' | 'profile' | 'recommend' | 'favorites' | 'review' | 'settings';
 
 export interface AppState {
     currentPage: AppPage;
@@ -154,5 +183,6 @@ export interface AppState {
     recommendations: Recommendation[];
     favorites: Favorite[];
     weatherContext: WeatherContext | null;
+    cartItems: CartItem[];
     isLoading: boolean;
 }
