@@ -1,5 +1,5 @@
-import { Search } from 'lucide-react';
-import type { MenuProduct } from '../types';
+import { Search, ShoppingBag } from 'lucide-react';
+import type { MenuProduct, AppPage } from '../types';
 import MumuAvatar from '../components/MumuAvatar';
 import { useState } from 'react';
 
@@ -94,9 +94,11 @@ const menuProducts: MenuProduct[] = [
 
 interface Props {
     onSelectMenu: (product: MenuProduct) => void;
+    cartCount?: number;
+    onNavigate?: (page: AppPage) => void;
 }
 
-export default function MenuPage({ onSelectMenu }: Props) {
+export default function MenuPage({ onSelectMenu, cartCount = 0, onNavigate }: Props) {
     const [searchQuery, setSearchQuery] = useState('');
 
     const filteredProducts = menuProducts.filter(p =>
@@ -106,11 +108,30 @@ export default function MenuPage({ onSelectMenu }: Props) {
     return (
         <div className="menu-page">
             {/* 상단 헤더 */}
-            <div className="menu-header">
-                <div className="menu-header-logo">
-                    <MumuAvatar state="HAPPY" size={36} animate={false} />
+            <div className="menu-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className="menu-header-logo">
+                        <MumuAvatar state="HAPPY" size={36} animate={false} />
+                    </div>
+                    <h1 style={{ margin: 0 }}>메뉴</h1>
                 </div>
-                <h1>메뉴</h1>
+                <div
+                    style={{ position: 'relative', cursor: 'pointer', padding: '4px' }}
+                    onClick={() => onNavigate?.('cart')}
+                >
+                    <ShoppingBag size={24} color="#6B4C35" />
+                    {cartCount > 0 && (
+                        <span style={{
+                            position: 'absolute', top: '-4px', right: '-4px',
+                            background: '#FF6B6B', color: 'white', fontSize: '10px',
+                            fontWeight: 'bold', width: '16px', height: '16px',
+                            borderRadius: '50%', display: 'flex',
+                            alignItems: 'center', justifyContent: 'center'
+                        }}>
+                            {cartCount}
+                        </span>
+                    )}
+                </div>
             </div>
 
             {/* 검색바 */}

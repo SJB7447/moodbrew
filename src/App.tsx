@@ -171,6 +171,7 @@ export default function App() {
                         guestStatus={guestStatus}
                         userId={user?.user_id || null}
                         onUserRegister={handleUserRegister}
+                        onNavigate={setPage}
                     />
                 )}
                 {page === 'chat' && sessionId && (
@@ -180,7 +181,11 @@ export default function App() {
                     />
                 )}
                 {page === 'menu' && (
-                    <MenuPage onSelectMenu={handleSelectMenu} />
+                    <MenuPage
+                        onSelectMenu={handleSelectMenu}
+                        cartCount={cartCount}
+                        onNavigate={setPage}
+                    />
                 )}
                 {page === 'menu-detail' && selectedProduct && (
                     <MenuDetailPage
