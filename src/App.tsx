@@ -22,6 +22,7 @@ export default function App() {
     const [favorites, setFavorites] = useState<Favorite[]>([]);
     const [weatherCtx, setWeatherCtx] = useState<WeatherContext | null>(null);
     const [weatherDisplay, setWeatherDisplay] = useState<string | null>(null);
+    const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
     const [counselingSummary, setCounselingSummary] = useState('');
     const [toast, setToast] = useState<string | null>(null);
     const [reviewCafe, setReviewCafe] = useState<any>(null);
@@ -31,10 +32,26 @@ export default function App() {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [selectedProduct, setSelectedProduct] = useState<MenuProduct | null>(null);
 
-    // 초기 로드: 날씨 + 게스트 현황
+    // 초기 로드: 게스트 현황 + 위치 정보 기반 날씨 조회
     useEffect(() => {
-        api.getWeather().then(setWeatherCtx).catch(() => { });
         api.getGuestStatus().then(setGuestStatus).catch(() => { });
+
+        if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    setLocation({ lat: latitude, lng: longitude });
+                    api.getWeather(latitude, longitude).then(setWeatherCtx).catch(() => { });
+                },
+                (error) => {
+                    console.warn('Geolocation failed, falling back to IP/default location.', error);
+                    api.getWeather().then(setWeatherCtx).catch(() => { });
+                },
+                { timeout: 10000, enableHighAccuracy: false }
+            );
+        } else {
+            api.getWeather().then(setWeatherCtx).catch(() => { });
+        }
     }, []);
 
     const showToast = useCallback((msg: string) => {
@@ -75,7 +92,10 @@ export default function App() {
     const handleChatComplete = useCallback(async (profile: any) => {
         setEmotionProfile(profile);
         try {
-            const result = await api.getRecommendations(37.4967, 127.0282, profile);
+            // 위치 정보가 없으면 기본값 강남역(37.4967, 127.0282) 사용
+            const lat = location?.lat || 37.4967;
+            const lng = location?.lng || 127.0282;
+            const result = await api.getRecommendations(lat, lng, profile);
             setRecommendations(result.recommendations || []);
             setCounselingSummary(result.counseling_summary || '');
             setWeatherDisplay(result.weather_context || null);
