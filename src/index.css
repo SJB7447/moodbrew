@@ -2270,8 +2270,10 @@ body::before {
   transform: scale(0.94);
 }
 
-.home-mood-emoji {
-  font-size: 1.6rem;
+.home-mood-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
 }
 
 .home-mood-label {
