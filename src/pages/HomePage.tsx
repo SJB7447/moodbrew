@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send } from 'lucide-react';
-import type { WeatherContext } from '../types';
+import { Send, User } from 'lucide-react';
+import type { WeatherContext, AppPage } from '../types';
 import * as api from '../services/api';
 import MumuAvatar from '../components/MumuAvatar';
 import type { MumuState } from '../components/MumuAvatar';
@@ -19,6 +19,7 @@ interface Props {
     guestStatus: { guest_count: number; remaining: number };
     userId: string | null;
     onUserRegister: () => Promise<{ userId: string; sessionId: string } | null>;
+    onNavigate?: (page: AppPage) => void;
 }
 
 // 무드 옵션
@@ -52,7 +53,7 @@ function getMumuState(step: number, isComplete: boolean, chatStarted: boolean): 
     return 'FOCUSED';
 }
 
-export default function HomePage({ onComplete, weatherCtx, guestStatus, userId, onUserRegister }: Props) {
+export default function HomePage({ onComplete, weatherCtx, guestStatus, userId, onUserRegister, onNavigate }: Props) {
     const [chatStarted, setChatStarted] = useState(false);
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [messages, setMessages] = useState<ChatMsg[]>([]);
@@ -167,31 +168,33 @@ export default function HomePage({ onComplete, weatherCtx, guestStatus, userId, 
             {/* ===== 상담 시작 전: 히어로 + 기분 선택 ===== */}
             {!chatStarted && (
                 <>
-                    {/* 상단 헤더 */}
-                    <div className="home-header">
-                        <div className="home-logo">
-                            <span className="home-logo-icon">☕</span>
-                            <div>
-                                <span className="home-logo-text">MUOU</span>
-                                <span className="home-logo-sub">BREW</span>
-                            </div>
+                    {/* 통합 히어로 섹션 (오버랩) */}
+                    <div className="home-hero-section">
+                        <div className="home-hero-video-bg">
+                            <video src="/mumu/mumu-hero.mp4" autoPlay loop muted playsInline />
+                            <div className="home-hero-overlay" />
                         </div>
-                        <div className="home-guest-info">
-                            {guestStatus.remaining > 0 ? (
-                                <span>오늘 {guestStatus.remaining}명 남음</span>
-                            ) : (
-                                <span>오늘 상담 마감</span>
-                            )}
-                        </div>
-                    </div>
 
-                    {/* 히어로 카드 */}
-                    <div className="home-hero">
-                        <div className="home-hero-card">
-                            <div className="home-hero-bg" />
-                            <div className="home-mumu">
-                                <MumuAvatar state="HAPPY" size={180} animate />
+                        <div className="home-hero-content">
+                            {/* 상단 헤더 */}
+                            <div className="home-header">
+                                <div className="home-logo">
+                                    <span className="home-logo-icon">☕</span>
+                                    <div>
+                                        <span className="home-logo-text">MUOU</span>
+                                        <span className="home-logo-sub">BREW</span>
+                                    </div>
+                                </div>
+                                <div className="home-guest-info" onClick={() => onNavigate?.('profile')}>
+                                    <User size={16} />
+                                    {guestStatus.remaining > 0 ? (
+                                        <span>오늘 {guestStatus.remaining}명 남음</span>
+                                    ) : (
+                                        <span>오늘 상담 마감</span>
+                                    )}
+                                </div>
                             </div>
+
                             <div className="home-hero-speech">
                                 <p>{getGreeting()}</p>
                             </div>
