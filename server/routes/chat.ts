@@ -5,6 +5,22 @@ import { generateEmpathyResponse, generateCounselingSummary, isGeminiAvailable }
 
 const router = Router();
 
+// 상담 세션 조회 (로그 남기기)
+router.get('/session/:id', (req, res) => {
+    const session = store.getSession(req.params.id);
+    if (!session) {
+        return res.status(404).json({ error: true, message: '세션을 찾을 수 없어요' });
+    }
+    res.json(session);
+});
+
+// 유저별 과거 상담 내역 리스트 조회
+router.get('/history/:userId', (req, res) => {
+    const sessions = store.getSessionsByUser(req.params.userId);
+    // 상태 파악을 위해 목록 형태만 반환할 수도 있지만, 우선 세션 배열 째로 전달
+    res.json(sessions);
+});
+
 // 상담 세션 시작
 router.post('/start', (req, res) => {
     const { user_id } = req.body;

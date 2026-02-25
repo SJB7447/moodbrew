@@ -23,6 +23,8 @@ export const removeFavorite = (userId: string, favId: string) =>
 // Chat
 export const startChat = (userId: string) =>
     request('/chat/start', { method: 'POST', body: JSON.stringify({ user_id: userId }) });
+export const getChatSession = (sessionId: string) => request(`/chat/session/${sessionId}`);
+export const getChatHistory = (userId: string) => request(`/chat/history/${userId}`);
 export const sendChatMessage = (sessionId: string, message: string) =>
     request('/chat/message', { method: 'POST', body: JSON.stringify({ session_id: sessionId, message }) });
 

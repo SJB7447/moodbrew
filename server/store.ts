@@ -131,6 +131,17 @@ export function updateSession(sessionId: string, data: Partial<any>): any | null
     return session;
 }
 
+export function getSessionsByUser(userId: string): any[] {
+    const userSessions = [];
+    for (const session of store.sessions.values()) {
+        if (session.user_id === userId) {
+            userSessions.push(session);
+        }
+    }
+    // 가장 최근 세션이 위로 오도록 정렬
+    return userSessions.sort((a, b) => b.created_at - a.created_at);
+}
+
 // ===== 리뷰 =====
 export function addReview(data: any): any {
     const review = {

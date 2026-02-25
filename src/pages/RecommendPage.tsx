@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MapPin, Navigation, Heart, Star } from 'lucide-react';
+import { MapPin, Navigation, Heart, Star, Coffee } from 'lucide-react';
 import type { Recommendation, Favorite } from '../types';
 import NavigationModal from '../components/NavigationModal';
 import MumuAvatar from '../components/MumuAvatar';
@@ -11,6 +11,7 @@ interface Props {
     favorites: Favorite[];
     onToggleFavorite: (cafeData: any) => void;
     onStartReview: (cafe: any) => void;
+    onStartMenu: (cafe: any) => void;
     userId?: string;
 }
 
@@ -18,7 +19,7 @@ const cafeEmojis = ['🏡', '🌅', '📚', '🌙', '🌿', '🌸', '☕', '🍰
 
 export default function RecommendPage({
     recommendations, counselingSummary, weatherDisplay, favorites,
-    onToggleFavorite, onStartReview
+    onToggleFavorite, onStartReview, onStartMenu
 }: Props) {
     const [navModal, setNavModal] = useState<Recommendation | null>(null);
 
@@ -108,6 +109,13 @@ export default function RecommendPage({
                                 >
                                     <Navigation size={16} />
                                     길찾기
+                                </button>
+                                <button
+                                    className="cafe-action-btn primary"
+                                    onClick={() => onStartMenu(rec)}
+                                >
+                                    <Coffee size={16} />
+                                    메뉴
                                 </button>
                                 <button
                                     className={`cafe-action-btn ${isFavorite(rec.cafe_id) ? 'saved' : ''}`}

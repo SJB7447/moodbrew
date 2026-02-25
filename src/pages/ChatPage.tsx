@@ -15,6 +15,7 @@ interface ChatMsg {
 interface Props {
     sessionId: string;
     onComplete: (profile: any) => void;
+    onBack?: () => void;
 }
 
 // 상담 단계에 따라 무무 표정 변경
@@ -26,7 +27,7 @@ function getMumuState(step: number, isComplete: boolean): MumuState {
     return 'FOCUSED';
 }
 
-export default function ChatPage({ sessionId, onComplete }: Props) {
+export default function ChatPage({ sessionId, onComplete, onBack }: Props) {
     const [messages, setMessages] = useState<ChatMsg[]>([]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
@@ -36,14 +37,25 @@ export default function ChatPage({ sessionId, onComplete }: Props) {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    // 초기 메시지 로드
+    // 초기 메시지 및 과거 로그 로드
     useEffect(() => {
-        api.startChat('current_user').then(data => {
-            if (data.message) {
-                setMessages([data.message]);
+        setMessages([]);
+        setStep(0);
+        setIsComplete(false);
+        setIsTyping(false);
+
+        api.getChatSession(sessionId).then(data => {
+            if (data && data.messages) {
+                setMessages(data.messages);
+                if (data.step !== undefined) setStep(data.step);
+                if (data.is_complete) {
+                    setIsComplete(true);
+                }
             }
+        }).catch(err => {
+            console.error('Failed to load chat session:', err);
         });
-    }, []);
+    }, [sessionId]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -113,7 +125,27 @@ export default function ChatPage({ sessionId, onComplete }: Props) {
 
     return (
         <div className="chat-page">
-            <div className="chat-header">
+            <div className="chat-header" style={{ position: 'relative' }}>
+                {onBack && isComplete && (
+                    <button
+                        onClick={onBack}
+                        style={{
+                            position: 'absolute',
+                            left: '16px',
+                            background: 'none',
+                            border: 'none',
+                            padding: '8px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}
+                    >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--mocha)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                )}
                 <div className="chat-header-avatar">
                     <MumuAvatar state={mumuState} size={48} animate />
                 </div>

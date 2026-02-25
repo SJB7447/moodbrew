@@ -12,11 +12,20 @@ import MenuDetailPage from './pages/MenuDetailPage';
 import CartPage from './pages/CartPage';
 import ProfilePage from './pages/ProfilePage';
 import Navigation from './components/Navigation';
+import MumuAvatar from './components/MumuAvatar';
+import ChatHistoryPage from './pages/ChatHistoryPage';
 
 export default function App() {
     const [page, setPage] = useState<AppPage>('home');
     const [user, setUser] = useState<User | null>(null);
     const [sessionId, setSessionId] = useState<string | null>(null);
+    const [historySessionId, setHistorySessionId] = useState<string | null>(null);
+
+    const handleNavigation = useCallback((p: AppPage) => {
+        setHistorySessionId(null);
+        setPage(p);
+    }, []);
+
     const [emotionProfile, setEmotionProfile] = useState<any>(null);
     const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
     const [favorites, setFavorites] = useState<Favorite[]>([]);
@@ -26,6 +35,7 @@ export default function App() {
     const [counselingSummary, setCounselingSummary] = useState('');
     const [toast, setToast] = useState<string | null>(null);
     const [reviewCafe, setReviewCafe] = useState<any>(null);
+    const [menuCafe, setMenuCafe] = useState<any>(null);
     const [guestStatus, setGuestStatus] = useState({ guest_count: 0, remaining: 50 });
 
     // 장바구니 상태
@@ -99,6 +109,8 @@ export default function App() {
             setRecommendations(result.recommendations || []);
             setCounselingSummary(result.counseling_summary || '');
             setWeatherDisplay(result.weather_context || null);
+            // 상담 완료 후 세션 ID 초기화하여 다음 번 채팅 탭 접근 시 히스토리 목록이 나오게 함
+            setSessionId(null);
             setPage('recommend');
         } catch (e) {
             showToast('추천을 불러오지 못했어요 😢');
@@ -143,6 +155,12 @@ export default function App() {
         showToast('리뷰가 등록되었어요! 감사합니다 😊');
         setPage('recommend');
     }, [showToast]);
+
+    // 메뉴 보기
+    const handleStartMenu = useCallback((cafe: any) => {
+        setMenuCafe(cafe);
+        setPage('menu');
+    }, []);
 
     // 장바구니
     const handleAddToCart = useCallback((item: Omit<CartItem, 'id'>) => {
@@ -194,17 +212,56 @@ export default function App() {
                         onNavigate={setPage}
                     />
                 )}
-                {page === 'chat' && sessionId && (
+                {page === 'chat' && sessionId && !historySessionId && (
                     <ChatPage
                         sessionId={sessionId}
                         onComplete={handleChatComplete}
                     />
                 )}
+                {page === 'chat' && historySessionId && (
+                    <ChatPage
+                        sessionId={historySessionId}
+                        onComplete={handleChatComplete}
+                        onBack={() => setHistorySessionId(null)}
+                    />
+                )}
+                {page === 'chat' && !sessionId && !historySessionId && user && (
+                    <ChatHistoryPage
+                        userId={user.user_id}
+                        onSelectSession={setHistorySessionId}
+                        onNavigateHome={() => handleNavigation('home')}
+                    />
+                )}
+                {page === 'chat' && !sessionId && !historySessionId && !user && (
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '16px', padding: '20px', textAlign: 'center' }}>
+                        <MumuAvatar state="SLEEPY" size={80} animate={false} />
+                        <p style={{ color: 'var(--mocha)', fontSize: '1rem', margin: 0 }}>
+                            아직 진행 중인 상담 내역이 없어요.
+                        </p>
+                        <button
+                            style={{
+                                padding: '12px 24px',
+                                background: 'linear-gradient(135deg, var(--mocha), var(--espresso))',
+                                color: 'var(--cream)',
+                                border: 'none',
+                                borderRadius: 'var(--radius-pill)',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                boxShadow: 'var(--shadow-soft)'
+                            }}
+                            onClick={() => setPage('home')}
+                        >
+                            홈으로 가서 상담 시작하기
+                        </button>
+                    </div>
+                )}
                 {page === 'menu' && (
                     <MenuPage
+                        cafe={menuCafe}
                         onSelectMenu={handleSelectMenu}
                         cartCount={cartCount}
                         onNavigate={setPage}
+                        onBack={() => setPage('recommend')}
                     />
                 )}
                 {page === 'menu-detail' && selectedProduct && (
@@ -232,6 +289,7 @@ export default function App() {
                         favorites={favorites}
                         onToggleFavorite={handleToggleFavorite}
                         onStartReview={handleStartReview}
+                        onStartMenu={handleStartMenu}
                         userId={user?.user_id}
                     />
                 )}
@@ -251,7 +309,7 @@ export default function App() {
                 )}
                 {page === 'settings' && <SettingsPage />}
             </div>
-            <Navigation currentPage={page} onNavigate={setPage} cartCount={cartCount} />
+            <Navigation currentPage={page} onNavigate={handleNavigation} cartCount={cartCount} />
             {toast && <div className="toast">{toast}</div>}
         </div>
     );

@@ -1,4 +1,4 @@
-import { Search, ShoppingBag } from 'lucide-react';
+import { Search, ShoppingBag, ArrowLeft } from 'lucide-react';
 import type { MenuProduct, AppPage } from '../types';
 import MumuAvatar from '../components/MumuAvatar';
 import { useState } from 'react';
@@ -93,12 +93,14 @@ const menuProducts: MenuProduct[] = [
 ];
 
 interface Props {
+    cafe?: any;
     onSelectMenu: (product: MenuProduct) => void;
     cartCount?: number;
     onNavigate?: (page: AppPage) => void;
+    onBack?: () => void;
 }
 
-export default function MenuPage({ onSelectMenu, cartCount = 0, onNavigate }: Props) {
+export default function MenuPage({ cafe, onSelectMenu, cartCount = 0, onNavigate, onBack }: Props) {
     const [searchQuery, setSearchQuery] = useState('');
 
     const filteredProducts = menuProducts.filter(p =>
@@ -110,10 +112,19 @@ export default function MenuPage({ onSelectMenu, cartCount = 0, onNavigate }: Pr
             {/* 상단 헤더 */}
             <div className="menu-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div className="menu-header-logo">
-                        <MumuAvatar state="HAPPY" size={36} animate={false} />
-                    </div>
-                    <h1 style={{ margin: 0 }}>메뉴</h1>
+                    {onBack && (
+                        <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex' }}>
+                            <ArrowLeft size={24} color="#6B4C35" />
+                        </button>
+                    )}
+                    {!onBack && (
+                        <div className="menu-header-logo">
+                            <MumuAvatar state="HAPPY" size={36} animate={false} />
+                        </div>
+                    )}
+                    <h1 style={{ margin: 0, fontSize: '1.25rem' }}>
+                        {cafe ? `${cafe.cafe_name} 추천 메뉴` : '메뉴'}
+                    </h1>
                 </div>
                 <div
                     style={{ position: 'relative', cursor: 'pointer', padding: '4px' }}

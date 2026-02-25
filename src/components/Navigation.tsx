@@ -11,7 +11,6 @@ export default function Navigation({ currentPage, onNavigate, cartCount = 0 }: P
     const items: { page: AppPage; icon: typeof Home; label: string }[] = [
         { page: 'home', icon: Home, label: '홈' },
         { page: 'chat', icon: MessageCircle, label: '상담' },
-        { page: 'menu', icon: Coffee, label: '메뉴' },
         { page: 'recommend', icon: Star, label: '추천' },
         { page: 'favorites', icon: Heart, label: '즐겨찾기' },
     ];
