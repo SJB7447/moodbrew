@@ -26,14 +26,14 @@ interface Props {
 
 // 무드 옵션
 const moodOptions = [
-    { state: 'happy', emoji: '🥰', label: '행복해요' },
-    { state: 'sad', emoji: '😢', label: '우울해요' },
-    { state: 'tired', emoji: '🥱', label: '피곤해요' },
-    { state: 'excited', emoji: '🤩', label: '설레요' },
-    { state: 'angry', emoji: '😠', label: '짜증나요' },
-    { state: 'anxious', emoji: '🥺', label: '불안해요' },
-    { state: 'peaceful', emoji: '😌', label: '평온해요' },
-    { state: 'lonely', emoji: '🍂', label: '외로워요' },
+    { state: 'happy', img: '/mumu/happy.png', label: '행복해요' },
+    { state: 'sad', img: '/mumu/empathy.png', label: '우울해요' },
+    { state: 'tired', img: '/mumu/sleepy.png', label: '피곤해요' },
+    { state: 'excited', img: '/mumu/excited.png', label: '설레요' },
+    { state: 'angry', img: '/mumu/focused.png', label: '짜증나요' },
+    { state: 'anxious', img: '/mumu/thinking.png', label: '불안해요' },
+    { state: 'peaceful', img: '/mumu/celebrate.png', label: '평온해요' },
+    { state: 'lonely', img: '/mumu/rainy.png', label: '외로워요' },
 ];
 
 // 인사말 by 시간대
@@ -229,7 +229,7 @@ export default function HomePage({ onComplete, weatherCtx, guestStatus, user, on
                                     onClick={() => startChat(mood.label)}
                                     style={{ animationDelay: `${i * 0.06}s` }}
                                 >
-                                    <div className="home-mood-emoji">{mood.emoji}</div>
+                                    <img className="home-mood-img" src={mood.img} alt={mood.label} draggable={false} />
                                     <span className="home-mood-label">{mood.label}</span>
                                 </button>
                             ))}

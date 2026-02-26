@@ -2367,13 +2367,11 @@ body::before {
   transform: scale(0.94);
 }
 
-.home-mood-emoji {
+.home-mood-img {
   width: 100%;
-  aspect-ratio: 1 / 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.5rem;
+  aspect-ratio: 1 / 1.05;
+  object-fit: cover;
+  object-position: center;
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.4);
 }
