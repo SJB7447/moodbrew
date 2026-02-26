@@ -26,14 +26,14 @@ interface Props {
 
 // 무드 옵션
 const moodOptions = [
-    { state: 'happy', img: '/mumu/happy.png', label: '행복해요' },
-    { state: 'sad', img: '/mumu/empathy.png', label: '우울해요' },
-    { state: 'tired', img: '/mumu/sleepy.png', label: '피곤해요' },
-    { state: 'excited', img: '/mumu/excited.png', label: '설레요' },
-    { state: 'angry', img: '/mumu/focused.png', label: '짜증나요' },
-    { state: 'anxious', img: '/mumu/thinking.png', label: '불안해요' },
-    { state: 'peaceful', img: '/mumu/celebrate.png', label: '평온해요' },
-    { state: 'lonely', img: '/mumu/rainy.png', label: '외로워요' },
+    { state: 'happy', img: '/mumu/happy.jpeg', label: '행복해요' },
+    { state: 'sad', img: '/mumu/empathy.jpeg', label: '우울해요' },
+    { state: 'tired', img: '/mumu/sleepy.jpeg', label: '피곤해요' },
+    { state: 'excited', img: '/mumu/excited.jpeg', label: '설레요' },
+    { state: 'angry', img: '/mumu/focused.jpeg', label: '짜증나요' },
+    { state: 'anxious', img: '/mumu/thinking.jpeg', label: '불안해요' },
+    { state: 'peaceful', img: '/mumu/celebrate.jpeg', label: '평온해요' },
+    { state: 'lonely', img: '/mumu/rainy.jpeg', label: '외로워요' },
 ];
 
 // 인사말 by 시간대
