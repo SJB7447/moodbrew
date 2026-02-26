@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, User } from 'lucide-react';
-import type { WeatherContext, AppPage } from '../types';
+import { Send, User as UserIcon } from 'lucide-react';
+import type { WeatherContext, AppPage, User } from '../types';
 import * as api from '../services/api';
 import MumuAvatar from '../components/MumuAvatar';
 import type { MumuState } from '../components/MumuAvatar';
@@ -17,9 +17,11 @@ interface Props {
     onComplete: (profile: any) => void;
     weatherCtx: WeatherContext | null;
     guestStatus: { guest_count: number; remaining: number };
-    userId: string | null;
+    user: User | null;
     onUserRegister: () => Promise<{ userId: string; sessionId: string } | null>;
     onNavigate?: (page: AppPage) => void;
+    onOpenAuth: () => void;
+    onLogout: () => void;
 }
 
 // 무드 옵션
@@ -53,7 +55,7 @@ function getMumuState(step: number, isComplete: boolean, chatStarted: boolean): 
     return 'FOCUSED';
 }
 
-export default function HomePage({ onComplete, weatherCtx, guestStatus, userId, onUserRegister, onNavigate }: Props) {
+export default function HomePage({ onComplete, weatherCtx, guestStatus, user, onUserRegister, onNavigate, onOpenAuth, onLogout }: Props) {
     const [chatStarted, setChatStarted] = useState(false);
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [messages, setMessages] = useState<ChatMsg[]>([]);
@@ -185,12 +187,16 @@ export default function HomePage({ onComplete, weatherCtx, guestStatus, userId, 
                                         <span className="home-logo-sub">BREW</span>
                                     </div>
                                 </div>
-                                <div className="home-guest-info" onClick={() => onNavigate?.('profile')}>
-                                    <User size={16} />
-                                    {guestStatus.remaining > 0 ? (
-                                        <span>오늘 {guestStatus.remaining}명 남음</span>
+                                <div
+                                    className="home-guest-info"
+                                    onClick={user?.user_type === 'member' ? onLogout : onOpenAuth}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <UserIcon size={16} />
+                                    {user?.user_type === 'member' ? (
+                                        <span>로그아웃</span>
                                     ) : (
-                                        <span>오늘 상담 마감</span>
+                                        <span>로그인/가입</span>
                                     )}
                                 </div>
                             </div>

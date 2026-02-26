@@ -14,12 +14,14 @@ import ProfilePage from './pages/ProfilePage';
 import Navigation from './components/Navigation';
 import MumuAvatar from './components/MumuAvatar';
 import ChatHistoryPage from './pages/ChatHistoryPage';
+import AuthModal from './components/AuthModal';
 
 export default function App() {
     const [page, setPage] = useState<AppPage>('home');
     const [user, setUser] = useState<User | null>(null);
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [historySessionId, setHistorySessionId] = useState<string | null>(null);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
     const handleNavigation = useCallback((p: AppPage) => {
         setHistorySessionId(null);
@@ -207,9 +209,11 @@ export default function App() {
                         onComplete={handleChatComplete}
                         weatherCtx={weatherCtx}
                         guestStatus={guestStatus}
-                        userId={user?.user_id || null}
+                        user={user}
                         onUserRegister={handleUserRegister}
                         onNavigate={setPage}
+                        onOpenAuth={() => setIsAuthModalOpen(true)}
+                        onLogout={() => { setUser(null); showToast('로그아웃 되었습니다. 👋'); }}
                     />
                 )}
                 {page === 'chat' && sessionId && !historySessionId && (
@@ -311,6 +315,15 @@ export default function App() {
             </div>
             <Navigation currentPage={page} onNavigate={handleNavigation} cartCount={cartCount} />
             {toast && <div className="toast">{toast}</div>}
+            <AuthModal
+                isOpen={isAuthModalOpen}
+                onClose={() => setIsAuthModalOpen(false)}
+                onSuccess={(newUser) => {
+                    setUser(newUser);
+                    showToast(`환영합니다, ${newUser.nickname}님! ✨`);
+                }}
+                currentGuestId={user?.user_type === 'guest' ? user.user_id : null}
+            />
         </div>
     );
 }

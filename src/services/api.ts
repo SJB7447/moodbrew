@@ -11,8 +11,11 @@ async function request(url: string, options?: RequestInit) {
     return res.json();
 }
 
-// User / Guest
+// User / Guest / Member
 export const registerGuest = () => request('/user/guest-register', { method: 'POST' });
+export const registerMember = (data: any) => request('/user/register', { method: 'POST', body: JSON.stringify(data) });
+export const loginMember = (data: any) => request('/user/login', { method: 'POST', body: JSON.stringify(data) });
+export const googleLogin = (data: any) => request('/user/google-auth', { method: 'POST', body: JSON.stringify(data) });
 export const getGuestStatus = () => request('/user/guest-status');
 export const getFavorites = (userId: string) => request(`/user/${userId}/favorites`);
 export const addFavorite = (userId: string, data: any) =>

@@ -44,6 +44,82 @@ export function registerGuest(): { user_id: string; guest_number: number } | nul
     return { user_id: userId, guest_number: store.guestCount };
 }
 
+// ===== 회원 관리 =====
+export function registerMember(data: any): any {
+    // 이메일 중복 확인
+    for (const u of store.users.values()) {
+        if (u.user_type === 'member' && u.email === data.email) {
+            return { error: '이미 가입된 이메일이에요!' };
+        }
+    }
+
+    let userId = `member_${uuidv4().slice(0, 8)}`;
+
+    // 기존 게스트 데이터 병합 여부
+    if (data.guest_id && store.users.has(data.guest_id)) {
+        userId = data.guest_id; // 기존 아이디 유지하면서 타입만 변경
+    }
+
+    const newUser = {
+        user_id: userId,
+        user_type: 'member',
+        email: data.email,
+        password: data.password, // 데모 목적 평문 저장 (실제 서비스에서는 해시 필수)
+        nickname: data.nickname,
+        created_at: Date.now(),
+        last_active: Date.now(),
+    };
+
+    store.users.set(userId, newUser);
+
+    // 반환 시 비밀번호 제거
+    const { password, ...safeUser } = newUser;
+    return safeUser;
+}
+
+export function loginMember(data: any): any {
+    for (const u of store.users.values()) {
+        if (u.user_type === 'member' && u.email === data.email && u.password === data.password) {
+            u.last_active = Date.now();
+            const { password, ...safeUser } = u;
+            return safeUser;
+        }
+    }
+    return { error: '이메일 또는 비밀번호가 일치하지 않아요.' };
+}
+
+export function socialLoginMember(email: string, name: string, platform: string, guestId?: string): any {
+    // 이미 해당 이메일로 가입한 내역이 있는지 먼저 확인
+    for (const u of store.users.values()) {
+        if (u.user_type === 'member' && u.email === email) {
+            u.last_active = Date.now();
+            const { password, ...safeUser } = u;
+            return safeUser; // 기존 계정 로그인
+        }
+    }
+
+    // 신규 소셜 회원 가입 처리
+    let userId = `${platform}_${uuidv4().slice(0, 8)}`;
+
+    // 게스트 데이터 병합 연동
+    if (guestId && store.users.has(guestId)) {
+        userId = guestId;
+    }
+
+    const newUser = {
+        user_id: userId,
+        user_type: 'member',
+        email,
+        nickname: name,
+        social_platform: platform,
+        created_at: Date.now(),
+        last_active: Date.now(),
+    };
+
+    store.users.set(userId, newUser);
+    return newUser;
+}
+
 // ===== 즐겨찾기 =====
 export function getFavorites(userId: string): any[] {
     return store.favorites.get(userId) || [];
