@@ -26,14 +26,14 @@ interface Props {
 
 // 무드 옵션
 const moodOptions = [
-    { state: 'happy', img: '/mumu/happy.jpeg', label: '행복해요' },
-    { state: 'sad', img: '/mumu/empathy.jpeg', label: '우울해요' },
-    { state: 'tired', img: '/mumu/sleepy.jpeg', label: '피곤해요' },
-    { state: 'excited', img: '/mumu/excited.jpeg', label: '설레요' },
-    { state: 'angry', img: '/mumu/focused.jpeg', label: '짜증나요' },
-    { state: 'anxious', img: '/mumu/thinking.jpeg', label: '불안해요' },
-    { state: 'peaceful', img: '/mumu/celebrate.jpeg', label: '평온해요' },
-    { state: 'lonely', img: '/mumu/rainy.jpeg', label: '외로워요' },
+    { state: 'happy', img: '/mood/mumu/happy.jpeg', label: '행복해요' },
+    { state: 'sad', img: '/mood/mumu/empathy.jpeg', label: '우울해요' },
+    { state: 'tired', img: '/mood/mumu/sleepy.jpeg', label: '피곤해요' },
+    { state: 'excited', img: '/mood/mumu/excited.jpeg', label: '설레요' },
+    { state: 'angry', img: '/mood/mumu/focused.jpeg', label: '짜증나요' },
+    { state: 'anxious', img: '/mood/mumu/thinking.jpeg', label: '불안해요' },
+    { state: 'peaceful', img: '/mood/mumu/celebrate.jpeg', label: '평온해요' },
+    { state: 'lonely', img: '/mood/mumu/rainy.jpeg', label: '외로워요' },
 ];
 
 // 인사말 by 시간대
@@ -173,7 +173,7 @@ export default function HomePage({ onComplete, weatherCtx, guestStatus, user, on
                     {/* 통합 히어로 섹션 (오버랩) */}
                     <div className="home-hero-section">
                         <div className="home-hero-video-bg">
-                            <video src="/mumu/mumu-hero.mp4" autoPlay loop muted playsInline />
+                            <video src="/mood/mumu/mumu-hero.mp4" autoPlay loop muted playsInline />
                             <div className="home-hero-overlay" />
                         </div>
 

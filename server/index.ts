@@ -32,9 +32,14 @@ app.get('/api/health', (req, res) => {
 
 // 프로덕션: Vite 빌드 결과물 서빙
 const distPath = path.resolve(__dirname, '..', 'dist');
-app.use(express.static(distPath));
-app.get('*', (req, res) => {
+// 정적 파일을 /mood 경로에서 서빙
+app.use('/mood', express.static(distPath));
+app.get('/mood/*', (req, res) => {
     res.sendFile(path.join(distPath, 'index.html'));
+});
+// 홈 경로 리다이렉트 (옵션이나 편의를 위해 추가)
+app.get('/', (req, res) => {
+    res.redirect('/mood/');
 });
 
 app.listen(PORT, () => {

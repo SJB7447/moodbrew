@@ -4,14 +4,14 @@
 export type MumuState = 'HAPPY' | 'THINKING' | 'SAD_EMPATHY' | 'SLEEPY' | 'EXCITED' | 'RAINY' | 'CELEBRATE' | 'FOCUSED';
 
 const MUMU_IMAGES: Record<MumuState, string> = {
-    HAPPY: '/mumu/happy.jpeg',
-    THINKING: '/mumu/thinking.jpeg',
-    SAD_EMPATHY: '/mumu/empathy.jpeg',
-    SLEEPY: '/mumu/sleepy.jpeg',
-    EXCITED: '/mumu/excited.jpeg',
-    RAINY: '/mumu/rainy.jpeg',
-    CELEBRATE: '/mumu/celebrate.jpeg',
-    FOCUSED: '/mumu/focused.jpeg',
+    HAPPY: '/mood/mumu/happy.jpeg',
+    THINKING: '/mood/mumu/thinking.jpeg',
+    SAD_EMPATHY: '/mood/mumu/empathy.jpeg',
+    SLEEPY: '/mood/mumu/sleepy.jpeg',
+    EXCITED: '/mood/mumu/excited.jpeg',
+    RAINY: '/mood/mumu/rainy.jpeg',
+    CELEBRATE: '/mood/mumu/celebrate.jpeg',
+    FOCUSED: '/mood/mumu/focused.jpeg',
 };
 
 const MUMU_LABELS: Record<MumuState, string> = {
