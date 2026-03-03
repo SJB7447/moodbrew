@@ -26,13 +26,13 @@ interface Props {
 
 // 무드 옵션
 const moodOptions = [
-    { state: 'happy', img: '/mood/mumu/happy.jpeg', label: '행복해요' },
+    { state: 'happy', img: '/mood/mumu/thinking.jpeg', label: '행복해요' },
     { state: 'sad', img: '/mood/mumu/empathy.jpeg', label: '우울해요' },
     { state: 'tired', img: '/mood/mumu/sleepy.jpeg', label: '피곤해요' },
-    { state: 'excited', img: '/mood/mumu/excited.jpeg', label: '설레요' },
-    { state: 'angry', img: '/mood/mumu/focused.jpeg', label: '짜증나요' },
-    { state: 'anxious', img: '/mood/mumu/thinking.jpeg', label: '불안해요' },
-    { state: 'peaceful', img: '/mood/mumu/celebrate.jpeg', label: '평온해요' },
+    { state: 'excited', img: '/mood/mumu/focused.jpeg', label: '설레요' },
+    { state: 'angry', img: '/mood/mumu/happy.jpeg', label: '짜증나요' },
+    { state: 'anxious', img: '/mood/mumu/celebrate.jpeg', label: '불안해요' },
+    { state: 'peaceful', img: '/mood/mumu/excited.jpeg', label: '평온해요' },
     { state: 'lonely', img: '/mood/mumu/rainy.jpeg', label: '외로워요' },
 ];
 

@@ -7,7 +7,7 @@ import { useState } from 'react';
 const menuProducts: MenuProduct[] = [
     {
         id: 'menu_1', name: '시그니처 라떼', nameEn: 'Signature Latte',
-        price: 13900, image: '/mood/mumu/happy.png',
+        price: 13900, image: '/mood/mumu/excited.png',
         description: '무무 브루의 시그니처! 부드러운 라떼 위에 무무 아트가 올라간 특별한 한 잔',
         category: 'coffee',
         options: { temperatures: ['HOT', 'ICE'], sizes: ['S', 'M', 'L'] },
@@ -20,7 +20,7 @@ const menuProducts: MenuProduct[] = [
     },
     {
         id: 'menu_2', name: '크림라떼 허니', nameEn: 'Cream Latte Honey',
-        price: 11900, image: '/mood/mumu/thinking.png',
+        price: 11900, image: '/mood/mumu/happy.png',
         description: '달콤한 허니와 부드러운 크림이 조화로운 라떼. 고민이 많은 날 추천!',
         category: 'coffee',
         options: { temperatures: ['HOT', 'ICE'], sizes: ['S', 'M', 'L'] },
@@ -32,7 +32,7 @@ const menuProducts: MenuProduct[] = [
     },
     {
         id: 'menu_3', name: '크림 라떼', nameEn: 'Coffee Latte',
-        price: 17500, image: '/mood/mumu/excited.png',
+        price: 17500, image: '/mood/mumu/focused.png',
         description: '깊은 에스프레소와 풍성한 크림의 만남. 기분 좋은 하루의 시작!',
         category: 'coffee',
         options: { temperatures: ['HOT', 'ICE'], sizes: ['S', 'M', 'L'] },
@@ -44,7 +44,7 @@ const menuProducts: MenuProduct[] = [
     },
     {
         id: 'menu_4', name: '카라멜 마끼아또', nameEn: 'Coffee Macchiato',
-        price: 13900, image: '/mood/mumu/celebrate.png',
+        price: 13900, image: '/mood/mumu/thinking.png',
         description: '달콤한 카라멜과 부드러운 우유 거품의 완벽한 조화',
         category: 'coffee',
         options: { temperatures: ['HOT', 'ICE'], sizes: ['S', 'M', 'L'] },
@@ -60,7 +60,7 @@ const menuProducts: MenuProduct[] = [
     },
     {
         id: 'menu_6', name: '시나몬 다쿠아즈 디저트', nameEn: 'Ube Dacquoise Joy',
-        price: 17900, image: '/mood/mumu/focused.png',
+        price: 17900, image: '/mood/mumu/celebrate.png',
         description: '바삭한 다쿠아즈에 시나몬 크림을 듬뿍. 집중할 때 에너지 충전!',
         category: 'dessert',
         options: { temperatures: ['HOT'], sizes: ['S'] },
@@ -84,7 +84,7 @@ const menuProducts: MenuProduct[] = [
     },
     {
         id: 'menu_9', name: '타르트 딸 장미', nameEn: 'Flamingo pink dahllia',
-        price: 17900, image: '/mood/mumu/celebrate.png',
+        price: 17900, image: '/mood/mumu/thinking.png',
         description: '장미 크림을 올린 프리미엄 타르트. 특별한 날을 위한 디저트',
         category: 'dessert',
         options: { temperatures: ['HOT'], sizes: ['S'] },
