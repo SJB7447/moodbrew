@@ -9,32 +9,38 @@ const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 const router = Router();
 
 // 게스트 등록
-router.post('/guest-register', (req, res) => {
-    if (!store.canRegisterGuest()) {
+router.post('/guest-register', async (req, res) => {
+    const canRegister = await store.canRegisterGuest();
+    const currentCount = await store.getGuestCount();
+
+    if (!canRegister) {
         return res.status(403).json({
             error: true,
             message: '게스트 인원이 가득 찼어요 🙏\n더 나은 서비스를 위해 회원가입을 진행해 주세요!',
-            guest_count: store.getGuestCount(),
+            guest_count: currentCount,
             max_guests: 50,
         });
     }
-    const result = store.registerGuest();
-    res.json({ success: true, ...result, guest_count: store.getGuestCount() });
+    const result = await store.registerGuest();
+    const newCount = await store.getGuestCount();
+    res.json({ success: true, ...result, guest_count: newCount });
 });
 
 // 게스트 현황
-router.get('/guest-status', (req, res) => {
+router.get('/guest-status', async (req, res) => {
+    const currentCount = await store.getGuestCount();
+    const canRegister = await store.canRegisterGuest();
     res.json({
-        guest_count: store.getGuestCount(),
+        guest_count: currentCount,
         max_guests: 50,
-        remaining: 50 - store.getGuestCount(),
-        is_full: !store.canRegisterGuest(),
+        remaining: 50 - currentCount,
+        is_full: !canRegister,
     });
 });
 
 // 회원 가입
-router.post('/register', (req, res) => {
-    const result = store.registerMember(req.body);
+router.post('/register', async (req, res) => {
+    const result = await store.registerMember(req.body);
     if (result.error) {
         return res.status(400).json({ error: true, message: result.error });
     }
@@ -42,8 +48,8 @@ router.post('/register', (req, res) => {
 });
 
 // 로그인
-router.post('/login', (req, res) => {
-    const result = store.loginMember(req.body);
+router.post('/login', async (req, res) => {
+    const result = await store.loginMember(req.body);
     if (result.error) {
         return res.status(401).json({ error: true, message: result.error });
     }
@@ -81,7 +87,7 @@ router.post('/google-auth', async (req, res) => {
         }
 
         // store에 위임
-        const result = store.socialLoginMember(userEmail, userName, 'google', guest_id);
+        const result = await store.socialLoginMember(userEmail, userName, 'google', guest_id);
         res.json({ success: true, user: result });
     } catch (err: any) {
         console.error('Google Auth Error:', err);
@@ -90,14 +96,14 @@ router.post('/google-auth', async (req, res) => {
 });
 
 // 즐겨찾기 조회
-router.get('/:userId/favorites', (req, res) => {
-    const favs = store.getFavorites(req.params.userId);
+router.get('/:userId/favorites', async (req, res) => {
+    const favs = await store.getFavorites(req.params.userId);
     res.json({ favorites: favs, count: favs.length });
 });
 
 // 즐겨찾기 추가
-router.post('/:userId/favorites', (req, res) => {
-    const result = store.addFavorite(req.params.userId, req.body);
+router.post('/:userId/favorites', async (req, res) => {
+    const result = await store.addFavorite(req.params.userId, req.body);
     if (result.error) {
         return res.status(400).json({ error: true, message: result.error });
     }
@@ -105,8 +111,8 @@ router.post('/:userId/favorites', (req, res) => {
 });
 
 // 즐겨찾기 삭제
-router.delete('/:userId/favorites/:favId', (req, res) => {
-    const removed = store.removeFavorite(req.params.userId, req.params.favId);
+router.delete('/:userId/favorites/:favId', async (req, res) => {
+    const removed = await store.removeFavorite(req.params.userId, req.params.favId);
     if (!removed) {
         return res.status(404).json({ error: true, message: '즐겨찾기를 찾을 수 없어요' });
     }
@@ -114,14 +120,14 @@ router.delete('/:userId/favorites/:favId', (req, res) => {
 });
 
 // 방문 이력 조회
-router.get('/:userId/visits', (req, res) => {
-    const visits = store.getVisits(req.params.userId);
+router.get('/:userId/visits', async (req, res) => {
+    const visits = await store.getVisits(req.params.userId);
     res.json({ visits, count: visits.length });
 });
 
 // 방문 이력 저장
-router.post('/:userId/visits', (req, res) => {
-    const visit = store.addVisit(req.params.userId, req.body);
+router.post('/:userId/visits', async (req, res) => {
+    const visit = await store.addVisit(req.params.userId, req.body);
     res.json({ success: true, visit });
 });
 

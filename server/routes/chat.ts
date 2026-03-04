@@ -6,8 +6,8 @@ import { generateEmpathyResponse, generateCounselingSummary, isGeminiAvailable }
 const router = Router();
 
 // 상담 세션 조회 (로그 남기기)
-router.get('/session/:id', (req, res) => {
-    const session = store.getSession(req.params.id);
+router.get('/session/:id', async (req, res) => {
+    const session = await store.getSession(req.params.id);
     if (!session) {
         return res.status(404).json({ error: true, message: '세션을 찾을 수 없어요' });
     }
@@ -15,16 +15,16 @@ router.get('/session/:id', (req, res) => {
 });
 
 // 유저별 과거 상담 내역 리스트 조회
-router.get('/history/:userId', (req, res) => {
-    const sessions = store.getSessionsByUser(req.params.userId);
+router.get('/history/:userId', async (req, res) => {
+    const sessions = await store.getSessionsByUser(req.params.userId);
     // 상태 파악을 위해 목록 형태만 반환할 수도 있지만, 우선 세션 배열 째로 전달
     res.json(sessions);
 });
 
 // 상담 세션 시작
-router.post('/start', (req, res) => {
+router.post('/start', async (req, res) => {
     const { user_id } = req.body;
-    const session = store.createSession(user_id || 'anonymous');
+    const session = await store.createSession(user_id || 'anonymous');
     const firstQ = getNextQuestion(session);
 
     const botMessage = {
@@ -37,9 +37,9 @@ router.post('/start', (req, res) => {
 
     session.messages = [botMessage];
     session.step = 0;
-    store.updateSession(session.session_id, session);
+    await store.updateSession(session.session_id, session);
 
-    store.trackEvent({ type: 'chat_start', user_id, session_id: session.session_id });
+    await store.trackEvent({ type: 'chat_start', user_id, session_id: session.session_id });
 
     res.json({
         session_id: session.session_id,
@@ -51,7 +51,7 @@ router.post('/start', (req, res) => {
 // 메시지 교환
 router.post('/message', async (req, res) => {
     const { session_id, message } = req.body;
-    const session = store.getSession(session_id);
+    const session = await store.getSession(session_id);
 
     if (!session) {
         return res.status(404).json({ error: true, message: '세션을 찾을 수 없어요' });
@@ -117,9 +117,9 @@ router.post('/message', async (req, res) => {
             timestamp: Date.now(),
         });
         session.messages.push(...responses);
-        store.updateSession(session_id, session);
+        await store.updateSession(session_id, session);
 
-        store.trackEvent({ type: 'chat_complete', user_id: session.user_id, session_id, emotion_profile: session.emotion_profile });
+        await store.trackEvent({ type: 'chat_complete', user_id: session.user_id, session_id, emotion_profile: session.emotion_profile });
 
         return res.json({
             is_complete: true,
@@ -140,7 +140,7 @@ router.post('/message', async (req, res) => {
     });
 
     session.messages.push(...responses);
-    store.updateSession(session_id, session);
+    await store.updateSession(session_id, session);
 
     res.json({
         is_complete: false,

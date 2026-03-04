@@ -4,15 +4,15 @@ import * as store from '../store.js';
 const router = Router();
 
 // 리뷰 제출
-router.post('/', (req, res) => {
-    const review = store.addReview(req.body);
-    store.trackEvent({ type: 'review_submit', cafe_id: req.body.cafe_id, user_id: req.body.user_id });
+router.post('/', async (req, res) => {
+    const review = await store.addReview(req.body);
+    await store.trackEvent({ type: 'review_submit', cafe_id: req.body.cafe_id, user_id: req.body.user_id });
     res.json({ success: true, review });
 });
 
 // 카페별 리뷰 통계
-router.get('/cafe/:cafeId', (req, res) => {
-    const reviews = store.getReviewsByCafe(req.params.cafeId);
+router.get('/cafe/:cafeId', async (req, res) => {
+    const reviews = await store.getReviewsByCafe(req.params.cafeId);
 
     // 태그 빈도 분석
     const tagCounts: Record<string, number> = {};

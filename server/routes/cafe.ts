@@ -8,7 +8,7 @@ import { getWeatherContext, applyWeatherBoost } from '../agents/weather.js';
 const router = Router();
 
 // 위치 기반 카페 탐색
-router.post('/search', (req, res) => {
+router.post('/search', async (req, res) => {
     const { lat = 37.4967, lng = 127.0282, radius = 300, emotion_profile } = req.body;
 
     const result = searchCafes(lat, lng, radius);
@@ -18,13 +18,13 @@ router.post('/search', (req, res) => {
         result.cafe_list = filterByProfile(result.cafe_list, emotion_profile);
     }
 
-    store.trackEvent({ type: 'cafe_search', lat, lng, radius, results: result.total_found });
+    await store.trackEvent({ type: 'cafe_search', lat, lng, radius, results: result.total_found });
 
     res.json(result);
 });
 
 // AI 추천 (감성 매칭)
-router.post('/recommend', (req, res) => {
+router.post('/recommend', async (req, res) => {
     const { lat = 37.4967, lng = 127.0282, emotion_profile, include_weather = true } = req.body;
 
     if (!emotion_profile) {
@@ -36,7 +36,7 @@ router.post('/recommend', (req, res) => {
     const cafes = filterByProfile(searchResult.cafe_list, emotion_profile);
 
     // 2. 리뷰 데이터 수집
-    const allReviews = store.getAllReviews();
+    const allReviews = await store.getAllReviews();
 
     // 3. 추천 생성
     let recommendations = generateRecommendations(emotion_profile, cafes, allReviews);
@@ -58,7 +58,7 @@ router.post('/recommend', (req, res) => {
         ? `오늘의 감성: ${moodTags.map((t: string) => `#${t}`).join(' ')}`
         : '오늘의 기분에 맞는 카페를 찾았어요 ☕';
 
-    store.trackEvent({ type: 'recommend', recommendations_count: recommendations.length, emotion_profile });
+    await store.trackEvent({ type: 'recommend', recommendations_count: recommendations.length, emotion_profile });
 
     res.json({
         recommendations,
@@ -70,7 +70,7 @@ router.post('/recommend', (req, res) => {
 });
 
 // 길찾기 딥링크
-router.get('/:cafeId/navigate', (req, res) => {
+router.get('/:cafeId/navigate', async (req, res) => {
     const { lat, lng, cafe_name, cafe_lat, cafe_lng, address } = req.query;
 
     const result = generateNavigationLinks(
@@ -84,7 +84,7 @@ router.get('/:cafeId/navigate', (req, res) => {
         }
     );
 
-    store.trackEvent({ type: 'navigate', cafe_id: req.params.cafeId });
+    await store.trackEvent({ type: 'navigate', cafe_id: req.params.cafeId });
 
     res.json(result);
 });
